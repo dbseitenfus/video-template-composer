@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "id": "dica-rapida",
+  "name": "Dica rápida",
+  "description": "Formato de Reels/TikTok: começa direto no gancho, sem abertura. Uma dica, um exemplo e um convite para seguir.",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "fps": 30,
+  "resolutions": [
+    1080,
+    720
+  ],
+  "slots": [
+    {
+      "id": "gancho",
+      "label": "Gancho",
+      "script": "Pare de [erro comum]! Em 30 segundos eu te mostro [a solução].",
+      "minDuration": 2,
+      "maxDuration": 6,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "DICA RÁPIDA",
+          "x": 0.5,
+          "y": 0.12,
+          "align": "center",
+          "fontSize": 0.04,
+          "fontWeight": 800,
+          "color": "#1d1d1f",
+          "start": 0,
+          "animation": "pop",
+          "shadow": false,
+          "maxWidth": 0.85,
+          "background": {
+            "color": "#7cf5c8",
+            "padding": 0.012
+          }
+        }
+      ]
+    },
+    {
+      "id": "dica",
+      "label": "A dica",
+      "script": "A dica é: [a dica, explicada em uma ou duas frases].\nIsso funciona porque [o motivo].",
+      "minDuration": 6,
+      "maxDuration": 40,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "1",
+          "x": 0.5,
+          "y": 0.12,
+          "align": "center",
+          "fontSize": 0.06,
+          "fontWeight": 800,
+          "color": "#1d1d1f",
+          "start": 0,
+          "animation": "pop",
+          "shadow": false,
+          "maxWidth": 0.2,
+          "background": {
+            "color": "#7cf5c8",
+            "padding": 0.012
+          }
+        }
+      ]
+    },
+    {
+      "id": "exemplo",
+      "label": "Na prática",
+      "script": "Na prática, fica assim: [um exemplo concreto].",
+      "minDuration": 5,
+      "maxDuration": 30,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "2",
+          "x": 0.5,
+          "y": 0.12,
+          "align": "center",
+          "fontSize": 0.06,
+          "fontWeight": 800,
+          "color": "#1d1d1f",
+          "start": 0,
+          "animation": "pop",
+          "shadow": false,
+          "maxWidth": 0.2,
+          "background": {
+            "color": "#7cf5c8",
+            "padding": 0.012
+          }
+        }
+      ]
+    },
+    {
+      "id": "siga",
+      "label": "Siga",
+      "script": "Gostou? Salva esse vídeo e me segue para mais dicas de [tema].",
+      "minDuration": 2,
+      "maxDuration": 8,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "Siga para mais dicas",
+          "x": 0.5,
+          "y": 0.85,
+          "align": "center",
+          "fontSize": 0.045,
+          "fontWeight": 800,
+          "color": "#1d1d1f",
+          "start": 0.3,
+          "animation": "slide-up",
+          "shadow": false,
+          "maxWidth": 0.85,
+          "background": {
+            "color": "#7cf5c8",
+            "padding": 0.012
+          }
+        }
+      ]
+    }
+  ],
+  "outro": {
+    "duration": 1.5,
+    "background": {
+      "type": "color",
+      "color": "#7cf5c8"
+    },
+    "layers": [
+      {
+        "type": "image",
+        "asset": "logo-escuro.svg",
+        "x": 0.5,
+        "y": 0.5,
+        "width": 0.6,
+        "start": 0,
+        "animation": "pop",
+        "animationDuration": 0.5
+      }
+    ]
+  },
+  "logo": {
+    "asset": "logo.svg",
+    "position": "bottom-right",
+    "width": 0.2,
+    "margin": 0.05,
+    "opacity": 0.7,
+    "showOn": "slots"
+  },
+  "music": {
+    "asset": "trilha-animada.wav",
+    "volume": 0.5,
+    "duckedVolume": 0.12,
+    "fadeIn": 0,
+    "fadeOut": 1
+  },
+  "transition": {
+    "type": "cut",
+    "duration": 0.3
+  }
+}

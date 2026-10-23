@@ -242,7 +242,23 @@ Um template pode ter clipes fixos (vinheta, trecho institucional) entre os trech
 
 Opcionais: `trimStart` (segundos), `fit` (`cover` ou `contain`), `background` e `layers` (textos e imagens por cima, como nos slots). O arquivo vai em `packages/templates/assets/` e deve ser MP4 H.264/AAC, na proporção do template e com pelo menos a duração declarada. O app baixa o clipe na primeira exportação e o guarda em cache para uso offline; ele fica fora do precache para não baixar os vídeos de todos os templates na instalação.
 
-A trilha de exemplo (`trilha-leve.wav`) é gerada por `npm run gen:music`, e a vinheta de exemplo (`vinheta-marca.mp4`) por `npm run gen:clip` (usa o Chrome instalado). A telemetria de erros só envia algo se `VITE_TELEMETRY_URL` estiver definido.
+**Templates incluídos** (em `packages/templates/templates/`; cada arquivo JSON da pasta vira um template, validado ao carregar):
+
+| Template | Formato | Estrutura |
+| --- | --- | --- |
+| Depoimento vertical | 9:16 | abertura · 3 falas · vinheta · encerramento |
+| Depoimento de cliente | 9:16 | abertura · quem é · antes · depois · recomendação · encerramento |
+| Dica rápida | 9:16 | sem abertura: gancho · dica · exemplo · siga · encerramento curto, com cortes secos |
+| Produto no feed | 1:1 | “Novidade” · vinheta · gancho · o que é · benefícios · chamada · encerramento |
+| Vaga de emprego | 9:16 | abertura · quem somos · a vaga · perfil · como se candidatar · encerramento |
+| Convite para evento | 9:16 | abertura · o evento · por que ir · data e local · vinheta · encerramento |
+| Apresentação horizontal | 16:9 | abertura · 2 falas · encerramento |
+| Boas-vindas à equipe | 16:9 | abertura · vídeo institucional · boas-vindas · cultura · primeiros passos · encerramento |
+| Pitch de startup | 16:9 | abertura · problema · solução · mercado · time · pedido · encerramento |
+
+Os textos entre colchetes (`[link para candidatura]`, `[data] · [horário]`, `[e-mail] · [site]`) são para a equipe preencher no admin antes de publicar. A **galeria** (`npm run bench` e abrir `/gallery.html`) desenha cada template em todas as partes com a mesma `renderFrame` do app, para revisar o visual sem gravar nada.
+
+As trilhas de exemplo (`trilha-leve.wav`, `trilha-animada.wav`) são geradas por `npm run gen:music`, e as vinhetas de exemplo em 9:16, 16:9 e 1:1 por `npm run gen:clip` (usa o Chrome instalado). A telemetria de erros só envia algo se `VITE_TELEMETRY_URL` estiver definido.
 
 ## Admin de templates
 

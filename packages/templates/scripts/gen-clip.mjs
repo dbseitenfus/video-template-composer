@@ -1,5 +1,6 @@
-// Gera assets/vinheta-marca.mp4 (4 s, 1080×1920, H.264 + AAC): um clipe de exemplo
-// para o template vertical. Codifica no Chrome com WebCodecs + Mediabunny, via Playwright.
+// Gera as vinhetas de exemplo (4 s, H.264 + AAC) em cada formato de template:
+// vinheta-marca.mp4 (9:16), vinheta-marca-16x9.mp4 e vinheta-marca-1x1.mp4.
+// Codifica no Chrome com WebCodecs + Mediabunny, via Playwright.
 // Uso: node packages/templates/scripts/gen-clip.mjs  (requer o Google Chrome instalado)
 import { createServer } from 'node:http'
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -21,9 +22,15 @@ const port = server.address().port
 const browser = await chromium.launch({ channel: 'chrome' })
 const page = await browser.newPage()
 await page.goto(`http://localhost:${port}/`)
-const base64 = await page.evaluate(async () => {
+const sizes = [
+  ['vinheta-marca.mp4', 1080, 1920],
+  ['vinheta-marca-16x9.mp4', 1920, 1080],
+  ['vinheta-marca-1x1.mp4', 1080, 1080],
+]
+for (const [file, width, height] of sizes) {
+const base64 = await page.evaluate(async ([W, H]) => {
   const mb = await import('/mediabunny.mjs')
-  const W = 1080, H = 1920, fps = 30, seconds = 4
+  const fps = 30, seconds = 4
   const canvas = new OffscreenCanvas(W, H)
   const ctx = canvas.getContext('2d')
   const output = new mb.Output({ format: new mb.Mp4OutputFormat({ fastStart: 'in-memory' }), target: new mb.BufferTarget() })
@@ -45,6 +52,7 @@ const base64 = await page.evaluate(async () => {
     for (let i = 0; i < 6; i++) {
       const r = ((t * 260 + i * 220) % 1320)
       ctx.strokeStyle = `rgba(255,255,255,${0.18 * (1 - r / 1320)})`
+      // (mesmo desenho em todos os formatos; só o centro muda com W e H)
       ctx.lineWidth = 18
       ctx.beginPath()
       ctx.arc(W / 2, H * 0.42, r, 0, Math.PI * 2)
@@ -99,8 +107,9 @@ const base64 = await page.evaluate(async () => {
   let s = ''
   for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000))
   return btoa(s)
-})
+}, [width, height])
+writeFileSync(fileURLToPath(new URL(`../assets/${file}`, import.meta.url)), Buffer.from(base64, 'base64'))
+console.log(`assets/${file} gerado`)
+}
 await browser.close()
 server.close()
-writeFileSync(fileURLToPath(new URL('../assets/vinheta-marca.mp4', import.meta.url)), Buffer.from(base64, 'base64'))
-console.log('assets/vinheta-marca.mp4 gerado')

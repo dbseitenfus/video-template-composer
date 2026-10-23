@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "id": "convite-evento",
+  "name": "Convite para evento",
+  "description": "Convite em 9:16: o que é o evento, por que ir, data e local, com vinheta antes do encerramento.",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "fps": 30,
+  "resolutions": [
+    1080,
+    720
+  ],
+  "intro": {
+    "duration": 2.5,
+    "background": {
+      "type": "gradient",
+      "from": "#2e1065",
+      "to": "#8b5cf6",
+      "angle": 200
+    },
+    "layers": [
+      {
+        "type": "text",
+        "text": "Você está",
+        "x": 0.5,
+        "y": 0.42,
+        "align": "center",
+        "fontSize": 0.06,
+        "fontWeight": 800,
+        "color": "#ffffff",
+        "start": 0,
+        "animation": "slide-up",
+        "shadow": false,
+        "maxWidth": 0.85
+      },
+      {
+        "type": "text",
+        "text": "convidado(a)!",
+        "x": 0.5,
+        "y": 0.48,
+        "align": "center",
+        "fontSize": 0.06,
+        "fontWeight": 800,
+        "color": "#e9d5ff",
+        "start": 0.25,
+        "animation": "slide-up",
+        "shadow": false,
+        "maxWidth": 0.85
+      }
+    ]
+  },
+  "slots": [
+    {
+      "id": "o-evento",
+      "label": "O evento",
+      "script": "Oi! Eu sou [seu nome] e quero te convidar para o [nome do evento].\nÉ um encontro para [objetivo do evento].",
+      "minDuration": 4,
+      "maxDuration": 20,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.06,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.03,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#8b5cf6",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 4.5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "por-que-ir",
+      "label": "Por que ir",
+      "script": "Vai ter [atração 1], [atração 2] e muita gente legal de [área].\nVocê vai sair de lá com [o que a pessoa ganha].",
+      "minDuration": 4,
+      "maxDuration": 20,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.06,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.03,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#8b5cf6",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 4.5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "data-local",
+      "label": "Data e local",
+      "script": "Anota aí: [data], às [horário], em [local].\nAs vagas são limitadas, então garanta a sua!",
+      "minDuration": 3,
+      "maxDuration": 15,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.06,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.03,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#8b5cf6",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 4.5,
+          "animation": "slide-up"
+        },
+        {
+          "type": "text",
+          "text": "[data] · [horário]\n[local]",
+          "x": 0.5,
+          "y": 0.2,
+          "align": "center",
+          "fontSize": 0.04,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "start": 0.5,
+          "animation": "slide-up",
+          "shadow": true,
+          "maxWidth": 0.85,
+          "background": {
+            "color": "#2e1065cc",
+            "padding": 0.012
+          }
+        }
+      ]
+    }
+  ],
+  "clips": [
+    {
+      "id": "vinheta",
+      "label": "Vinheta",
+      "asset": "vinheta-marca.mp4",
+      "after": "data-local",
+      "duration": 3,
+      "volume": 0.7,
+      "duckMusic": false
+    }
+  ],
+  "outro": {
+    "duration": 3,
+    "background": {
+      "type": "color",
+      "color": "#2e1065"
+    },
+    "layers": [
+      {
+        "type": "text",
+        "text": "Garanta sua vaga",
+        "x": 0.5,
+        "y": 0.45,
+        "align": "center",
+        "fontSize": 0.05,
+        "fontWeight": 800,
+        "color": "#ffffff",
+        "start": 0,
+        "animation": "pop",
+        "shadow": true,
+        "maxWidth": 0.9
+      },
+      {
+        "type": "text",
+        "text": "[link de inscrição]",
+        "x": 0.5,
+        "y": 0.52,
+        "align": "center",
+        "fontSize": 0.035,
+        "fontWeight": 700,
+        "color": "#e9d5ff",
+        "start": 0.3,
+        "animation": "slide-up",
+        "shadow": true,
+        "maxWidth": 0.85
+      }
+    ]
+  },
+  "logo": {
+    "asset": "logo.svg",
+    "position": "top-right",
+    "width": 0.24,
+    "margin": 0.05,
+    "opacity": 0.85,
+    "showOn": "slots"
+  },
+  "music": {
+    "asset": "trilha-animada.wav",
+    "volume": 0.55,
+    "duckedVolume": 0.1,
+    "fadeIn": 0.6,
+    "fadeOut": 1.5
+  },
+  "transition": {
+    "type": "fade-black",
+    "duration": 0.25
+  }
+}

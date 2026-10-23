@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "id": "pitch-startup",
+  "name": "Pitch de startup",
+  "description": "Pitch em 16:9 com até 2 minutos: problema, solução, mercado, time e o pedido.",
+  "canvas": {
+    "width": 1920,
+    "height": 1080
+  },
+  "fps": 30,
+  "resolutions": [
+    1080,
+    720
+  ],
+  "intro": {
+    "duration": 3,
+    "background": {
+      "type": "color",
+      "color": "#f5f3ee"
+    },
+    "layers": [
+      {
+        "type": "image",
+        "asset": "logo-escuro.svg",
+        "x": 0.5,
+        "y": 0.42,
+        "width": 0.32,
+        "start": 0,
+        "animation": "fade",
+        "animationDuration": 0.5
+      },
+      {
+        "type": "text",
+        "text": "{{template.name}}",
+        "x": 0.5,
+        "y": 0.62,
+        "align": "center",
+        "fontSize": 0.05,
+        "fontWeight": 700,
+        "color": "#1d1d1f",
+        "start": 0.4,
+        "animation": "slide-up",
+        "shadow": false,
+        "maxWidth": 0.85
+      }
+    ]
+  },
+  "slots": [
+    {
+      "id": "problema",
+      "label": "O problema",
+      "script": "Hoje, [quem sofre com o problema] perde [tempo/dinheiro] porque [causa].",
+      "minDuration": 5,
+      "maxDuration": 30,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.05,
+          "y": 0.87,
+          "align": "left",
+          "fontSize": 0.045,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#111827cc",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "solucao",
+      "label": "A solução",
+      "script": "A [nome da startup] resolve isso com [a solução em uma frase].\nO diferencial é [o que ninguém mais faz].",
+      "minDuration": 5,
+      "maxDuration": 30,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.05,
+          "y": 0.87,
+          "align": "left",
+          "fontSize": 0.045,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#111827cc",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "mercado",
+      "label": "Mercado e tração",
+      "script": "É um mercado de [tamanho]. Em [período], a gente já [números de tração].",
+      "minDuration": 5,
+      "maxDuration": 25,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.05,
+          "y": 0.87,
+          "align": "left",
+          "fontSize": 0.045,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#111827cc",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "time",
+      "label": "O time",
+      "script": "O time tem [experiências relevantes]. Eu sou [seu nome], [seu papel].",
+      "minDuration": 5,
+      "maxDuration": 25,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.05,
+          "y": 0.87,
+          "align": "left",
+          "fontSize": 0.045,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#111827cc",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "pedido",
+      "label": "O pedido",
+      "script": "Estamos buscando [o que você pede: investimento, parceria, clientes piloto].\nVamos conversar?",
+      "minDuration": 3,
+      "maxDuration": 20,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.05,
+          "y": 0.87,
+          "align": "left",
+          "fontSize": 0.045,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#111827cc",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 5,
+          "animation": "slide-up"
+        }
+      ]
+    }
+  ],
+  "outro": {
+    "duration": 3,
+    "background": {
+      "type": "color",
+      "color": "#f5f3ee"
+    },
+    "layers": [
+      {
+        "type": "text",
+        "text": "Vamos conversar?",
+        "x": 0.5,
+        "y": 0.42,
+        "align": "center",
+        "fontSize": 0.08,
+        "fontWeight": 800,
+        "color": "#1d1d1f",
+        "start": 0,
+        "animation": "pop",
+        "shadow": false,
+        "maxWidth": 0.85
+      },
+      {
+        "type": "text",
+        "text": "[e-mail] · [site]",
+        "x": 0.5,
+        "y": 0.55,
+        "align": "center",
+        "fontSize": 0.04,
+        "fontWeight": 700,
+        "color": "#1d1d1f",
+        "start": 0.3,
+        "animation": "slide-up",
+        "shadow": false,
+        "maxWidth": 0.85
+      }
+    ]
+  },
+  "logo": {
+    "asset": "logo.svg",
+    "position": "top-right",
+    "width": 0.12,
+    "margin": 0.035,
+    "opacity": 0.8,
+    "showOn": "slots"
+  },
+  "music": {
+    "asset": "trilha-leve.wav",
+    "volume": 0.4,
+    "duckedVolume": 0.06,
+    "fadeIn": 1,
+    "fadeOut": 2
+  },
+  "transition": {
+    "type": "fade-black",
+    "duration": 0.3
+  }
+}

@@ -1,6 +1,4 @@
 import { parseTemplate, templateAssets, type Template } from '@takeslot/schema'
-import depoimentoVertical from '../templates/depoimento-vertical.json'
-import apresentacaoHorizontal from '../templates/apresentacao-horizontal.json'
 
 const assetUrls = import.meta.glob('../assets/*', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
@@ -24,7 +22,30 @@ function entry(raw: unknown): TemplateEntry {
   return { template, assets: Object.fromEntries([...images, ...audio, ...videos].map((name) => [name, assetUrl(name)])) }
 }
 
-export const templates: TemplateEntry[] = [entry(depoimentoVertical), entry(apresentacaoHorizontal)]
+const files = import.meta.glob('../templates/*.json', { eager: true, import: 'default' }) as Record<string, unknown>
+
+/** Ordem de exibição; templates fora da lista aparecem depois, em ordem alfabética. */
+const ORDER = [
+  'depoimento-vertical',
+  'depoimento-cliente',
+  'dica-rapida',
+  'produto-feed',
+  'vaga-de-emprego',
+  'convite-evento',
+  'apresentacao-horizontal',
+  'boas-vindas-equipe',
+  'pitch-startup',
+]
+
+const rank = (id: string) => {
+  const i = ORDER.indexOf(id)
+  return i === -1 ? ORDER.length : i
+}
+
+/** Templates embutidos: cada arquivo em `templates/` é validado com o schema ao carregar. */
+export const templates: TemplateEntry[] = Object.values(files)
+  .map(entry)
+  .sort((a, b) => rank(a.template.id) - rank(b.template.id) || a.template.id.localeCompare(b.template.id))
 
 export function findTemplate(id: string): TemplateEntry | undefined {
   return templates.find((t) => t.template.id === id)

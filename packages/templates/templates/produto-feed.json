@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "id": "produto-feed",
+  "name": "Produto no feed",
+  "description": "Vídeo quadrado para o feed: gancho, o que é, benefícios e chamada para ação, com vinheta da marca.",
+  "canvas": {
+    "width": 1080,
+    "height": 1080
+  },
+  "fps": 30,
+  "resolutions": [
+    1080,
+    720
+  ],
+  "intro": {
+    "duration": 1.5,
+    "background": {
+      "type": "color",
+      "color": "#ff5a36"
+    },
+    "layers": [
+      {
+        "type": "text",
+        "text": "NOVIDADE",
+        "x": 0.5,
+        "y": 0.5,
+        "align": "center",
+        "fontSize": 0.11,
+        "fontWeight": 800,
+        "color": "#ffffff",
+        "start": 0,
+        "animation": "pop",
+        "shadow": false,
+        "maxWidth": 0.85
+      }
+    ]
+  },
+  "slots": [
+    {
+      "id": "gancho",
+      "label": "Gancho",
+      "script": "Você também [o problema que seu cliente tem]?",
+      "minDuration": 2,
+      "maxDuration": 8,
+      "fit": "cover",
+      "layers": []
+    },
+    {
+      "id": "o-que-e",
+      "label": "O que é",
+      "script": "Conheça a [nome do produto]: [o que ele faz em uma frase].",
+      "minDuration": 4,
+      "maxDuration": 20,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.06,
+          "y": 0.88,
+          "align": "left",
+          "fontSize": 0.04,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#ff5a36",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 4.5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "beneficios",
+      "label": "Benefícios",
+      "script": "Com ela você [benefício 1], [benefício 2] e [benefício 3].",
+      "minDuration": 5,
+      "maxDuration": 25,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.06,
+          "y": 0.88,
+          "align": "left",
+          "fontSize": 0.04,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#ff5a36",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 4.5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "chamada",
+      "label": "Chamada",
+      "script": "Clique no link da bio e [a ação: compre, teste grátis, agende].",
+      "minDuration": 2,
+      "maxDuration": 10,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "Link na bio ↗",
+          "x": 0.5,
+          "y": 0.88,
+          "align": "center",
+          "fontSize": 0.05,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "start": 0.3,
+          "animation": "slide-up",
+          "shadow": true,
+          "maxWidth": 0.85,
+          "background": {
+            "color": "#ff5a36",
+            "padding": 0.012
+          }
+        }
+      ]
+    }
+  ],
+  "clips": [
+    {
+      "id": "vinheta",
+      "label": "Vinheta",
+      "asset": "vinheta-marca-1x1.mp4",
+      "after": "intro",
+      "duration": 2.5,
+      "volume": 0.7,
+      "duckMusic": false
+    }
+  ],
+  "outro": {
+    "duration": 2.5,
+    "background": {
+      "type": "gradient",
+      "from": "#1d1d1f",
+      "to": "#3a1a12",
+      "angle": 0
+    },
+    "layers": [
+      {
+        "type": "image",
+        "asset": "logo.svg",
+        "x": 0.5,
+        "y": 0.45,
+        "width": 0.55,
+        "start": 0,
+        "animation": "fade",
+        "animationDuration": 0.5
+      },
+      {
+        "type": "text",
+        "text": "Link na bio",
+        "x": 0.5,
+        "y": 0.6,
+        "align": "center",
+        "fontSize": 0.05,
+        "fontWeight": 700,
+        "color": "#ffb4a3",
+        "start": 0.3,
+        "animation": "slide-up",
+        "shadow": true,
+        "maxWidth": 0.85
+      }
+    ]
+  },
+  "logo": {
+    "asset": "logo.svg",
+    "position": "top-left",
+    "width": 0.22,
+    "margin": 0.04,
+    "opacity": 0.9,
+    "showOn": "slots"
+  },
+  "music": {
+    "asset": "trilha-animada.wav",
+    "volume": 0.55,
+    "duckedVolume": 0.1,
+    "fadeIn": 0.3,
+    "fadeOut": 1.2
+  },
+  "transition": {
+    "type": "cut",
+    "duration": 0.3
+  }
+}

@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "id": "vaga-de-emprego",
+  "name": "Vaga de emprego",
+  "description": "Divulgação de vaga em 9:16: quem somos, a vaga, o perfil e como se candidatar.",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "fps": 30,
+  "resolutions": [
+    1080,
+    720
+  ],
+  "intro": {
+    "duration": 2.5,
+    "background": {
+      "type": "color",
+      "color": "#1d1d1f"
+    },
+    "layers": [
+      {
+        "type": "text",
+        "text": "Estamos",
+        "x": 0.5,
+        "y": 0.42,
+        "align": "center",
+        "fontSize": 0.07,
+        "fontWeight": 800,
+        "color": "#ffffff",
+        "start": 0,
+        "animation": "slide-up",
+        "shadow": false,
+        "maxWidth": 0.85
+      },
+      {
+        "type": "text",
+        "text": "contratando!",
+        "x": 0.5,
+        "y": 0.48,
+        "align": "center",
+        "fontSize": 0.07,
+        "fontWeight": 800,
+        "color": "#ffd23f",
+        "start": 0.25,
+        "animation": "slide-up",
+        "shadow": false,
+        "maxWidth": 0.85
+      },
+      {
+        "type": "image",
+        "asset": "logo.svg",
+        "x": 0.5,
+        "y": 0.6,
+        "width": 0.4,
+        "start": 0.6,
+        "animation": "fade",
+        "animationDuration": 0.5
+      }
+    ]
+  },
+  "slots": [
+    {
+      "id": "quem-somos",
+      "label": "Quem somos",
+      "script": "Oi! Eu sou [seu nome], [seu cargo] na [empresa].\nA gente [o que a empresa faz e o que tem de especial].",
+      "minDuration": 4,
+      "maxDuration": 20,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.06,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.03,
+          "fontWeight": 800,
+          "color": "#1d1d1f",
+          "background": {
+            "color": "#ffd23f",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 4.5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "a-vaga",
+      "label": "A vaga",
+      "script": "Estamos procurando [cargo] para [o desafio da vaga].\nNo dia a dia você vai [principais atividades].",
+      "minDuration": 5,
+      "maxDuration": 25,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.06,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.03,
+          "fontWeight": 800,
+          "color": "#1d1d1f",
+          "background": {
+            "color": "#ffd23f",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 4.5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "perfil",
+      "label": "Quem procuramos",
+      "script": "A gente procura alguém que [requisitos principais].\nSe você [diferencial], melhor ainda!",
+      "minDuration": 5,
+      "maxDuration": 20,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.06,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.03,
+          "fontWeight": 800,
+          "color": "#1d1d1f",
+          "background": {
+            "color": "#ffd23f",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 4.5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "candidatura",
+      "label": "Como se candidatar",
+      "script": "Para se candidatar, é só [como se candidatar] até [prazo].\nVem com a gente!",
+      "minDuration": 3,
+      "maxDuration": 15,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.06,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.03,
+          "fontWeight": 800,
+          "color": "#1d1d1f",
+          "background": {
+            "color": "#ffd23f",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 4.5,
+          "animation": "slide-up"
+        }
+      ]
+    }
+  ],
+  "outro": {
+    "duration": 3,
+    "background": {
+      "type": "color",
+      "color": "#ffd23f"
+    },
+    "layers": [
+      {
+        "type": "text",
+        "text": "Candidate-se",
+        "x": 0.5,
+        "y": 0.42,
+        "align": "center",
+        "fontSize": 0.07,
+        "fontWeight": 800,
+        "color": "#1d1d1f",
+        "start": 0,
+        "animation": "pop",
+        "shadow": false,
+        "maxWidth": 0.85
+      },
+      {
+        "type": "text",
+        "text": "[link para candidatura]",
+        "x": 0.5,
+        "y": 0.5,
+        "align": "center",
+        "fontSize": 0.035,
+        "fontWeight": 700,
+        "color": "#1d1d1f",
+        "start": 0.3,
+        "animation": "slide-up",
+        "shadow": false,
+        "maxWidth": 0.85
+      },
+      {
+        "type": "image",
+        "asset": "logo-escuro.svg",
+        "x": 0.5,
+        "y": 0.62,
+        "width": 0.4,
+        "start": 0.5,
+        "animation": "fade",
+        "animationDuration": 0.5
+      }
+    ]
+  },
+  "logo": {
+    "asset": "logo.svg",
+    "position": "top-right",
+    "width": 0.24,
+    "margin": 0.05,
+    "opacity": 0.85,
+    "showOn": "slots"
+  },
+  "music": {
+    "asset": "trilha-animada.wav",
+    "volume": 0.45,
+    "duckedVolume": 0.08,
+    "fadeIn": 0.5,
+    "fadeOut": 1.5
+  },
+  "transition": {
+    "type": "fade-black",
+    "duration": 0.2
+  }
+}

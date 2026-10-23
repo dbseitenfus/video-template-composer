@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "id": "depoimento-cliente",
+  "name": "Depoimento de cliente",
+  "description": "Prova social em 9:16: o cliente conta como era antes, o que mudou e para quem recomenda.",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "fps": 30,
+  "resolutions": [
+    1080,
+    720
+  ],
+  "intro": {
+    "duration": 2.5,
+    "background": {
+      "type": "gradient",
+      "from": "#0f3d3e",
+      "to": "#1fa37a",
+      "angle": 160
+    },
+    "layers": [
+      {
+        "type": "image",
+        "asset": "logo.svg",
+        "x": 0.5,
+        "y": 0.4,
+        "width": 0.55,
+        "start": 0,
+        "animation": "pop",
+        "animationDuration": 0.5
+      },
+      {
+        "type": "text",
+        "text": "O que nossos clientes dizem",
+        "x": 0.5,
+        "y": 0.53,
+        "align": "center",
+        "fontSize": 0.042,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "start": 0.4,
+        "animation": "slide-up",
+        "shadow": true,
+        "maxWidth": 0.85
+      }
+    ]
+  },
+  "slots": [
+    {
+      "id": "cliente",
+      "label": "Quem é você",
+      "script": "Oi! Eu sou [seu nome], [seu cargo] na [sua empresa].\nA gente trabalha com [o que a empresa faz].",
+      "minDuration": 3,
+      "maxDuration": 15,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.06,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.03,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#1fa37a",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 4.5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "antes",
+      "label": "Como era antes",
+      "script": "Antes, o nosso maior problema era [o problema].\nIsso fazia a gente [o impacto: perder tempo, dinheiro, clientes].",
+      "minDuration": 5,
+      "maxDuration": 25,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.06,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.03,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#1fa37a",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 4.5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "depois",
+      "label": "O que mudou",
+      "script": "Com a [nome do produto], a gente passou a [o que mudou].\nHoje [um resultado concreto, de preferência com número].",
+      "minDuration": 5,
+      "maxDuration": 25,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.06,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.03,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#1fa37a",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 4.5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "recomendacao",
+      "label": "Recomendação",
+      "script": "Eu recomendo para quem [perfil de quem deveria usar].\nVale muito a pena!",
+      "minDuration": 3,
+      "maxDuration": 15,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.06,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.03,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#1fa37a",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 4.5,
+          "animation": "slide-up"
+        }
+      ]
+    }
+  ],
+  "outro": {
+    "duration": 3,
+    "background": {
+      "type": "color",
+      "color": "#0f3d3e"
+    },
+    "layers": [
+      {
+        "type": "image",
+        "asset": "logo.svg",
+        "x": 0.5,
+        "y": 0.42,
+        "width": 0.5,
+        "start": 0,
+        "animation": "fade",
+        "animationDuration": 0.5
+      },
+      {
+        "type": "text",
+        "text": "Seja o próximo caso de sucesso",
+        "x": 0.5,
+        "y": 0.56,
+        "align": "center",
+        "fontSize": 0.038,
+        "fontWeight": 700,
+        "color": "#bff3dd",
+        "start": 0.3,
+        "animation": "slide-up",
+        "shadow": true,
+        "maxWidth": 0.85
+      }
+    ]
+  },
+  "logo": {
+    "asset": "logo.svg",
+    "position": "top-right",
+    "width": 0.24,
+    "margin": 0.05,
+    "opacity": 0.85,
+    "showOn": "slots"
+  },
+  "music": {
+    "asset": "trilha-leve.wav",
+    "volume": 0.5,
+    "duckedVolume": 0.08,
+    "fadeIn": 0.8,
+    "fadeOut": 1.5
+  },
+  "transition": {
+    "type": "fade-black",
+    "duration": 0.25
+  }
+}

@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "id": "boas-vindas-equipe",
+  "name": "Boas-vindas à equipe",
+  "description": "Onboarding em 16:9: vídeo institucional, boas-vindas da liderança, cultura e primeiros passos.",
+  "canvas": {
+    "width": 1920,
+    "height": 1080
+  },
+  "fps": 30,
+  "resolutions": [
+    1080,
+    720
+  ],
+  "intro": {
+    "duration": 3,
+    "background": {
+      "type": "gradient",
+      "from": "#13235c",
+      "to": "#3b5bdb",
+      "angle": 90
+    },
+    "layers": [
+      {
+        "type": "image",
+        "asset": "logo.svg",
+        "x": 0.5,
+        "y": 0.4,
+        "width": 0.32,
+        "start": 0,
+        "animation": "fade",
+        "animationDuration": 0.5
+      },
+      {
+        "type": "text",
+        "text": "Boas-vindas ao time!",
+        "x": 0.5,
+        "y": 0.6,
+        "align": "center",
+        "fontSize": 0.07,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "start": 0.4,
+        "animation": "slide-up",
+        "shadow": true,
+        "maxWidth": 0.85
+      }
+    ]
+  },
+  "slots": [
+    {
+      "id": "boas-vindas",
+      "label": "Boas-vindas",
+      "script": "Oi, [nome de quem chega]! Eu sou [seu nome], [seu cargo].\nQue bom ter você com a gente. Neste vídeo a gente conta como as coisas funcionam por aqui.",
+      "minDuration": 5,
+      "maxDuration": 40,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.05,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.045,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#3b5bdb",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "cultura",
+      "label": "Nossa cultura",
+      "script": "O que mais importa para a gente é [valor 1], [valor 2] e [valor 3].\nNa prática, isso quer dizer que [exemplo do dia a dia].",
+      "minDuration": 5,
+      "maxDuration": 45,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.05,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.045,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#3b5bdb",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 5,
+          "animation": "slide-up"
+        }
+      ]
+    },
+    {
+      "id": "primeiros-passos",
+      "label": "Primeiros passos",
+      "script": "Na sua primeira semana você vai [o que vai acontecer].\nQualquer dúvida, fale com [pessoa ou canal].",
+      "minDuration": 5,
+      "maxDuration": 40,
+      "fit": "cover",
+      "layers": [
+        {
+          "type": "text",
+          "text": "{{slot.label}}",
+          "x": 0.05,
+          "y": 0.86,
+          "align": "left",
+          "fontSize": 0.045,
+          "fontWeight": 800,
+          "color": "#ffffff",
+          "background": {
+            "color": "#3b5bdb",
+            "padding": 0.012
+          },
+          "start": 0.5,
+          "end": 5,
+          "animation": "slide-up"
+        }
+      ]
+    }
+  ],
+  "clips": [
+    {
+      "id": "institucional",
+      "label": "Vídeo institucional",
+      "asset": "vinheta-marca-16x9.mp4",
+      "after": "intro",
+      "duration": 4,
+      "volume": 0.8,
+      "duckMusic": true
+    }
+  ],
+  "outro": {
+    "duration": 3,
+    "background": {
+      "type": "color",
+      "color": "#13235c"
+    },
+    "layers": [
+      {
+        "type": "text",
+        "text": "Bem-vindo(a) ao time!",
+        "x": 0.5,
+        "y": 0.45,
+        "align": "center",
+        "fontSize": 0.08,
+        "fontWeight": 800,
+        "color": "#ffffff",
+        "start": 0,
+        "animation": "pop",
+        "shadow": true,
+        "maxWidth": 0.85
+      },
+      {
+        "type": "image",
+        "asset": "logo.svg",
+        "x": 0.5,
+        "y": 0.65,
+        "width": 0.2,
+        "start": 0.4,
+        "animation": "fade",
+        "animationDuration": 0.5
+      }
+    ]
+  },
+  "logo": {
+    "asset": "logo.svg",
+    "position": "bottom-right",
+    "width": 0.13,
+    "margin": 0.035,
+    "opacity": 0.8,
+    "showOn": "slots"
+  },
+  "music": {
+    "asset": "trilha-leve.wav",
+    "volume": 0.45,
+    "duckedVolume": 0.07,
+    "fadeIn": 1,
+    "fadeOut": 2
+  },
+  "transition": {
+    "type": "fade-black",
+    "duration": 0.3
+  }
+}
