@@ -26,7 +26,6 @@ const failure = ref<string | null>(null)
 const template = computed(() => project.template!)
 const slot = computed(() => template.value.slots.find((s) => s.id === route.params.slot)!)
 const slotIndex = computed(() => template.value.slots.indexOf(slot.value))
-const portrait = computed(() => template.value.canvas.height > template.value.canvas.width)
 const aspect = computed(() => template.value.canvas.width / template.value.canvas.height)
 const remaining = computed(() => Math.max(0, slot.value.maxDuration - recorder.elapsed.value))
 const tooShort = computed(() => recorder.recording.value && recorder.elapsed.value < slot.value.minDuration)
@@ -46,7 +45,7 @@ const cameraMessage = computed(() => {
   }
 })
 
-onMounted(() => camera.start(portrait.value))
+onMounted(() => camera.start())
 
 // Para sozinho no tempo máximo do slot.
 watch(remaining, (r) => {
@@ -98,7 +97,7 @@ async function back() {
         <div class="bar">
           <button class="ghost small on-video" :disabled="saving" @click="back">Voltar</button>
           <span class="slot-name">{{ slotIndex + 1 }}/{{ template.slots.length }} · {{ slot.label }}</span>
-          <button class="ghost small on-video" :disabled="recorder.recording.value || countdown > 0" @click="camera.switchCamera(portrait)">Virar</button>
+          <button class="ghost small on-video" :disabled="recorder.recording.value || countdown > 0" @click="camera.switchCamera()">Virar</button>
         </div>
         <Teleprompter :script="slot.script" :active="recorder.recording.value" />
       </div>
@@ -106,7 +105,7 @@ async function back() {
       <div v-if="countdown > 0" class="countdown" aria-live="assertive">{{ countdown }}</div>
       <div v-if="cameraMessage" class="center-message">
         <p>{{ cameraMessage }}</p>
-        <button @click="camera.start(portrait)">Tentar de novo</button>
+        <button @click="camera.start()">Tentar de novo</button>
       </div>
 
       <div class="bottom">

@@ -24,11 +24,17 @@ export function useCamera() {
     stream.value = null
   }
 
-  /** @param portrait pede a câmera na orientação do template */
-  async function start(portrait: boolean, nextFacing: Facing = facing.value) {
+  /**
+   * Abre a câmera na orientação nativa do aparelho (paisagem no computador, retrato no celular em pé).
+   * Nunca pedimos o formato do template: o navegador recortaria e ampliaria a imagem para caber
+   * (crop-and-scale), o que vira um zoom enorme numa webcam. O enquadramento final é feito
+   * depois, com `fit` do slot, e a moldura na tela mostra o que vai entrar no vídeo.
+   */
+  async function start(nextFacing: Facing = facing.value) {
     stop()
     starting.value = true
     error.value = null
+    const portrait = window.matchMedia?.('(orientation: portrait)').matches ?? false
     try {
       stream.value = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -36,7 +42,8 @@ export function useCamera() {
           width: { ideal: portrait ? 1080 : 1920 },
           height: { ideal: portrait ? 1920 : 1080 },
           frameRate: { ideal: 30, max: 30 },
-        },
+          resizeMode: 'none',
+        } as MediaTrackConstraints,
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       })
       facing.value = nextFacing
@@ -47,8 +54,8 @@ export function useCamera() {
     }
   }
 
-  async function switchCamera(portrait: boolean) {
-    await start(portrait, facing.value === 'user' ? 'environment' : 'user')
+  async function switchCamera() {
+    await start(facing.value === 'user' ? 'environment' : 'user')
   }
 
   onScopeDispose(stop)

@@ -26,7 +26,14 @@ function onMetadata() {
   if (video.value) videoSize.value = { width: video.value.videoWidth, height: video.value.videoHeight }
 }
 
-/** Retângulo (em %) da área que entra no vídeo final, com `fit: cover`. */
+/** Caixa do vídeo na tela, na proporção real da captura (a moldura é posicionada dentro dela). */
+const frameStyle = computed(() => {
+  const { width, height } = videoSize.value
+  if (!width || !height) return {}
+  return { aspectRatio: `${width} / ${height}`, width: `min(100%, calc(100dvh * ${width / height}))`, height: "auto" }
+})
+
+/** Retângulo (em % da captura) da área que entra no vídeo final, com `fit: cover`. */
 const guide = computed(() => {
   const { width, height } = videoSize.value
   if (!width || !height) return null
@@ -42,8 +49,10 @@ defineExpose({ video })
 
 <template>
   <div class="camera">
-    <video ref="video" autoplay muted playsinline :class="{ mirrored }" @loadedmetadata="onMetadata" @resize="onMetadata" />
-    <div v-if="guide" class="guide" :style="{ width: `${guide.width}%`, height: `${guide.height}%` }" aria-hidden="true" />
+    <div class="frame" :style="frameStyle">
+      <video ref="video" autoplay muted playsinline :class="{ mirrored }" @loadedmetadata="onMetadata" @resize="onMetadata" />
+      <div v-if="guide" class="guide" :style="{ width: `${guide.width}%`, height: `${guide.height}%` }" aria-hidden="true" />
+    </div>
     <slot />
   </div>
 </template>
@@ -58,6 +67,15 @@ defineExpose({ video })
   display: grid;
   place-items: center;
 }
+.frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
 video {
   width: 100%;
   height: 100%;
@@ -68,9 +86,12 @@ video {
 }
 .guide {
   position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
   border: 2px dashed rgb(255 255 255 / 0.55);
-  box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.35);
-  border-radius: 6px;
+  /* Sem border-radius: o spread da sombra arredondaria os cantos e deixaria brechas claras. */
+  box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.5);
   pointer-events: none;
 }
 </style>
