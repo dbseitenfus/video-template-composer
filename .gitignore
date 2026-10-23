@@ -155,3 +155,7 @@ blob-report/
 
 # vite-plugin-pwa (modo dev)
 dev-dist/
+
+# Cloudflare (wrangler)
+.wrangler/
+.dev.vars

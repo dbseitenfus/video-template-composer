@@ -6,6 +6,7 @@ import { useProjectStore } from './stores/project'
 const route = useRoute()
 const project = useProjectStore()
 const fullscreen = computed(() => route.name === 'record')
+const admin = computed(() => !!route.meta.admin)
 const steps = [
   { name: 'home', label: 'Template' },
   { name: 'record', label: 'Gravar' },
@@ -18,7 +19,7 @@ const current = computed(() => steps.findIndex((s) => s.name === route.name))
 <template>
   <header v-if="!fullscreen" class="topbar">
     <RouterLink to="/" class="brand">takeslot</RouterLink>
-    <ol v-if="project.template" class="steps" aria-label="Etapas">
+    <ol v-if="project.template && !admin" class="steps" aria-label="Etapas">
       <li v-for="(step, i) in steps" :key="step.name" :class="{ done: i < current, current: i === current }">{{ step.label }}</li>
     </ol>
   </header>

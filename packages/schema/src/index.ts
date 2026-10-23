@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+// Mensagens de validação em português (aparecem no admin).
+z.config(z.locales.pt())
+
 /**
  * Schema do template. Todas as posições e tamanhos são normalizados (0–1)
  * em relação ao canvas, então o mesmo template rende em 720p ou 1080p.
@@ -252,3 +255,4 @@ export function outputSize(template: Template, resolution: Resolution): { width:
   const even = (n: number) => Math.max(2, Math.round((n * scale) / 2) * 2)
   return { width: even(width), height: even(height) }
 }
+export * from './sequence'

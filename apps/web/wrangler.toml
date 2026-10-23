@@ -1,0 +1,16 @@
+# Cloudflare Pages: app estático (dist) + Functions (/api) + D1 (templates) + R2 (arquivos).
+# Veja a seção "Admin de templates" do README para criar os recursos.
+name = "takeslot"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "takeslot"
+# Substitua pelo id mostrado por `npx wrangler d1 create takeslot`.
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "ASSETS_BUCKET"
+bucket_name = "takeslot-assets"

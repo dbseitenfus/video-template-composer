@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import { computed, markRaw, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
-import { buildTimeline, clipKey, gainAt, locate, musicGainKeyframes, renderFrame, videoKey, type Located, type SizedImage } from '@takeslot/engine'
+import {
+  buildTimeline,
+  clipKey,
+  gainAt,
+  locate,
+  musicGainKeyframes,
+  renderFrame,
+  videoKey,
+  type FrameSource,
+  type Located,
+  type SizedImage,
+} from '@takeslot/engine'
 import type { TemplateEntry } from '@takeslot/templates'
 import { templateAssets } from '@takeslot/schema'
 import { readFile } from '../lib/opfs'
@@ -14,8 +25,10 @@ import { formatDuration } from '../lib/format'
 const props = defineProps<{
   entry: TemplateEntry
   /** Caminho no OPFS do take de cada slot. */
-  takePaths: Record<string, string>
+  takePaths?: Record<string, string>
   takeDurations: Record<string, number>
+  /** Desenha um marcador no lugar dos trechos sem take (preview do admin). */
+  placeholders?: boolean
 }>()
 
 const canvas = ref<HTMLCanvasElement | null>(null)
@@ -66,7 +79,7 @@ async function load() {
   loading.value = true
   const vids: Record<string, HTMLVideoElement> = {}
   await Promise.all([
-    ...Object.entries(props.takePaths).map(async ([slotId, path]) => {
+    ...Object.entries(props.takePaths ?? {}).map(async ([slotId, path]) => {
       const file = await readFile(path)
       if (!file) return
       const url = URL.createObjectURL(file)
@@ -92,6 +105,39 @@ async function load() {
   draw()
 }
 
+const placeholderCache = new Map<string, FrameSource>()
+
+/** Quadro listrado com o nome do trecho: indica onde entra a gravação do usuário. */
+function placeholder(label: string): FrameSource {
+  const { width, height } = size.value
+  const key = `${label}|${width}x${height}`
+  const cached = placeholderCache.get(key)
+  if (cached) return cached
+  const c = document.createElement('canvas')
+  c.width = width
+  c.height = height
+  const ctx = c.getContext('2d')!
+  ctx.fillStyle = '#2a2a4d'
+  ctx.fillRect(0, 0, width, height)
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)'
+  ctx.lineWidth = width / 30
+  for (let x = -height; x < width; x += width / 10) {
+    ctx.beginPath()
+    ctx.moveTo(x, 0)
+    ctx.lineTo(x + height, height)
+    ctx.stroke()
+  }
+  ctx.fillStyle = 'rgba(255,255,255,0.75)'
+  ctx.textAlign = 'center'
+  ctx.font = `600 ${Math.round(Math.min(width, height) * 0.06)}px system-ui, sans-serif`
+  ctx.fillText('Gravação do usuário', width / 2, height / 2)
+  ctx.font = `500 ${Math.round(Math.min(width, height) * 0.045)}px system-ui, sans-serif`
+  ctx.fillText(label, width / 2, height / 2 + Math.min(width, height) * 0.08)
+  const frame = { image: c, width, height }
+  placeholderCache.set(key, frame)
+  return frame
+}
+
 function now() {
   return playing.value ? clockOffset + (performance.now() - clockStart) / 1000 : time.value
 }
@@ -100,8 +146,10 @@ function draw() {
   const ctx = canvas.value?.getContext('2d')
   if (!ctx) return
   const t = time.value
-  const v = activeVideo(locate(timeline.value, t))?.video
-  const frame = v && v.readyState >= 2 ? { image: v, width: v.videoWidth, height: v.videoHeight } : null
+  const located = locate(timeline.value, t)
+  const v = activeVideo(located)?.video
+  let frame: FrameSource | null = v && v.readyState >= 2 ? { image: v, width: v.videoWidth, height: v.videoHeight } : null
+  if (!frame && props.placeholders && located?.segment.kind === 'slot') frame = placeholder(located.segment.slot.label)
   renderFrame(ctx, template.value, t, { timeline: timeline.value, frame, images })
 }
 

@@ -214,7 +214,7 @@ PW_CHANNEL=chrome npm run test:e2e
 
 Sem `PW_CHANNEL`, o Playwright usa o próprio Chromium (`npx playwright install chromium`), e o áudio sai em Opus.
 
-A câmera e o OPFS exigem contexto seguro: no celular, abra o app por HTTPS (ou pelo deploy de preview do Cloudflare Pages). O deploy é o conteúdo de `apps/web/dist`; `_redirects` e `_headers` já estão em `apps/web/public`.
+A câmera e o OPFS exigem contexto seguro: no celular, abra o app por HTTPS (ou pelo deploy de preview do Cloudflare Pages). O deploy é feito com `npm run deploy -w @takeslot/web` (veja "Admin de templates"); `_headers` está em `apps/web/public`, e o Pages já serve a SPA sem regra de redirecionamento.
 
 **Onde está cada parte do pipeline**
 
@@ -226,7 +226,9 @@ A câmera e o OPFS exigem contexto seguro: no celular, abra o app por HTTPS (ou 
 | Amostragem por timestamp, encode, checkpoint e união dos pedaços | `packages/engine/src/sampler.ts`, `packages/engine/src/export.ts` |
 | Worker de exportação (OPFS + Comlink) | `apps/web/src/workers/export.worker.ts` |
 | Gravação em pedaços no OPFS | `apps/web/src/composables/useRecorder.ts` |
-| Templates e assets | `packages/templates/templates/*.json`, `packages/templates/assets/` |
+| Templates e assets embutidos (usados quando não há backend) | `packages/templates/templates/*.json`, `packages/templates/assets/` |
+| API de templates e arquivos (Cloudflare Pages Functions + D1 + R2) | `apps/web/functions/`, `apps/web/migrations/`, `apps/web/wrangler.toml` |
+| Admin de templates | `apps/web/src/admin/` (rota `/admin`) |
 
 **Vídeos fixos no meio do template**
 
@@ -241,4 +243,43 @@ Um template pode ter clipes fixos (vinheta, trecho institucional) entre os trech
 Opcionais: `trimStart` (segundos), `fit` (`cover` ou `contain`), `background` e `layers` (textos e imagens por cima, como nos slots). O arquivo vai em `packages/templates/assets/` e deve ser MP4 H.264/AAC, na proporção do template e com pelo menos a duração declarada. O app baixa o clipe na primeira exportação e o guarda em cache para uso offline; ele fica fora do precache para não baixar os vídeos de todos os templates na instalação.
 
 A trilha de exemplo (`trilha-leve.wav`) é gerada por `npm run gen:music`, e a vinheta de exemplo (`vinheta-marca.mp4`) por `npm run gen:clip` (usa o Chrome instalado). A telemetria de erros só envia algo se `VITE_TELEMETRY_URL` estiver definido.
+
+## Admin de templates
+
+Em `/admin`, a equipe cria e edita templates sem mexer em JSON. Na **Sequência do vídeo**, os trechos gravados pelo usuário e os vídeos pré-gravados ficam numa lista única, que pode ser reordenada arrastando os itens ou pelas setas. A abertura e o encerramento são opcionais e ficam fixos nas pontas. O preview ao lado usa a mesma `renderFrame` da exportação, com marcadores no lugar das gravações. Também dá para editar roteiro, limites de duração, textos e imagens por cima, logo, trilha, formato e transição. Para o que o formulário não cobre, há um editor de JSON validado.
+
+- **Rascunho e publicação:** salvar guarda o rascunho; publicar cria uma versão imutável. O app sempre recebe a versão publicada mais recente, e quem já começou a gravar continua na versão em que começou (o app guarda uma cópia do template).
+- **Arquivos:** logos, trilhas e vídeos ficam no R2, com chave derivada do conteúdo e cache permanente. Vídeos que não estejam em MP4 H.264/AAC são convertidos no navegador do admin antes do envio. Um arquivo em uso por algum template não pode ser apagado.
+- **Ordem no app:** a ordem da lista de templates no admin é a ordem que o usuário vê. Arquivar um template tira ele do app sem apagar nada.
+- **Sem backend:** se a API não responder (desenvolvimento só com `npm run dev`, ou nada publicado ainda), o app usa os templates embutidos em `packages/templates`. Offline, usa a última lista recebida.
+- **Acesso:** todas as rotas `/api/admin/*` exigem o token `ADMIN_TOKEN`, que fica só na aba do navegador. Para ter login por e-mail, coloque o Cloudflare Access na frente de `/admin*` e `/api/admin/*`.
+
+**Desenvolvimento local** (D1 e R2 simulados pelo wrangler, sem conta na Cloudflare):
+
+```bash
+cp apps/web/.dev.vars.example apps/web/.dev.vars   # defina ADMIN_TOKEN (mínimo de 16 caracteres)
+npm run dev:api      # build + migrações locais + API em http://localhost:8788 (app e admin servidos por ele)
+npm run dev          # opcional: Vite com hot reload em :5173, repassando /api para :8788
+```
+
+Em `/admin`, entre com o token e use **Importar exemplos** para copiar os templates embutidos para o backend.
+
+**Produção (Cloudflare Pages)**, uma vez:
+
+```bash
+cd apps/web
+npx wrangler d1 create takeslot                      # copie o database_id para o wrangler.toml
+npx wrangler r2 bucket create takeslot-assets
+npx wrangler d1 migrations apply takeslot --remote
+npx wrangler pages secret put ADMIN_TOKEN
+npm run deploy
+```
+
+**Custos:** D1 e R2 cabem no plano gratuito no começo (5 GB e 10 GB). O R2 não cobra pela transferência de saída, e isso pesa aqui, porque cada usuário baixa os vídeos pré-gravados.
+
+Testes ponta a ponta do admin contra o backend local (login, importação, reordenação, publicação e gravação/exportação com a nova ordem):
+
+```bash
+PW_CHANNEL=chrome npm run test:e2e:admin
+```
 

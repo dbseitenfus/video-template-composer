@@ -1,0 +1,2 @@
+# Copie para .dev.vars (não vai para o git). Em produção: npx wrangler pages secret put ADMIN_TOKEN
+ADMIN_TOKEN=troque-por-um-token-longo-e-aleatorio

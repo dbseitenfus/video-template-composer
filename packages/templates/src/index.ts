@@ -8,6 +8,8 @@ export interface TemplateEntry {
   template: Template
   /** URL de cada asset referenciado, por nome do arquivo. */
   assets: Record<string, string>
+  /** Versão publicada no admin; ausente nos templates embutidos no app. */
+  version?: number
 }
 
 function assetUrl(name: string): string {

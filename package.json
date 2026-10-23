@@ -9,12 +9,14 @@
   ],
   "scripts": {
     "dev": "npm run dev -w @takeslot/web",
+    "dev:api": "npm run dev:api -w @takeslot/web",
     "build": "npm run build -w @takeslot/web",
     "bench": "npm run dev -w @takeslot/bench",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "npm run test:e2e -w @takeslot/web",
+    "test:e2e:admin": "npm run test:e2e:admin -w @takeslot/web",
     "gen:music": "node packages/templates/scripts/gen-music.mjs",
     "gen:clip": "node packages/templates/scripts/gen-clip.mjs"
   },
