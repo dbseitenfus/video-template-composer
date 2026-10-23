@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "apresentacao-horizontal",
+  "name": "Apresentação horizontal",
+  "description": "Vídeo 16:9 para YouTube e LinkedIn: duas falas com título e encerramento.",
+  "canvas": { "width": 1920, "height": 1080 },
+  "fps": 30,
+  "resolutions": [1080, 720],
+  "intro": {
+    "duration": 3,
+    "background": { "type": "color", "color": "#f5f3ee" },
+    "layers": [
+      { "type": "image", "asset": "logo-escuro.svg", "x": 0.5, "y": 0.42, "width": 0.32, "animation": "fade" },
+      { "type": "text", "text": "{{template.name}}", "x": 0.5, "y": 0.62, "fontSize": 0.06, "color": "#1d1d1f", "shadow": false, "start": 0.5, "animation": "slide-up" }
+    ]
+  },
+  "slots": [
+    {
+      "id": "contexto",
+      "label": "Contexto",
+      "script": "Neste vídeo eu explico [o tema] em dois minutos.\nPrimeiro, o contexto: [por que isso importa].",
+      "minDuration": 5,
+      "maxDuration": 60,
+      "fit": "cover",
+      "layers": [
+        { "type": "text", "text": "{{slot.label}}", "x": 0.05, "y": 0.88, "align": "left", "fontSize": 0.045, "background": { "color": "#1d1d1fcc", "padding": 0.015 }, "start": 0.3, "end": 5, "animation": "slide-up" }
+      ]
+    },
+    {
+      "id": "proposta",
+      "label": "A proposta",
+      "script": "A proposta é [sua ideia principal].\nO próximo passo é [o que você pede para quem assiste].",
+      "minDuration": 5,
+      "maxDuration": 60,
+      "fit": "cover",
+      "layers": [
+        { "type": "text", "text": "{{slot.label}}", "x": 0.05, "y": 0.88, "align": "left", "fontSize": 0.045, "background": { "color": "#1d1d1fcc", "padding": 0.015 }, "start": 0.3, "end": 5, "animation": "slide-up" }
+      ]
+    }
+  ],
+  "outro": {
+    "duration": 3,
+    "background": { "type": "color", "color": "#f5f3ee" },
+    "layers": [
+      { "type": "text", "text": "Obrigado!", "x": 0.5, "y": 0.45, "fontSize": 0.09, "color": "#1d1d1f", "shadow": false, "animation": "pop" },
+      { "type": "image", "asset": "logo-escuro.svg", "x": 0.5, "y": 0.64, "width": 0.2, "start": 0.4 }
+    ]
+  },
+  "logo": { "asset": "logo.svg", "position": "bottom-right", "width": 0.14, "margin": 0.035, "opacity": 0.8, "showOn": "slots" },
+  "music": { "asset": "trilha-leve.wav", "volume": 0.5, "duckedVolume": 0.08, "fadeIn": 1, "fadeOut": 2 },
+  "transition": { "type": "fade-black", "duration": 0.3 }
+}

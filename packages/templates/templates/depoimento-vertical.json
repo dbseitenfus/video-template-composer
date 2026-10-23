@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "depoimento-vertical",
+  "name": "Depoimento vertical",
+  "description": "Vídeo 9:16 para Reels e Stories: apresentação, três falas curtas e chamada final.",
+  "canvas": { "width": 1080, "height": 1920 },
+  "fps": 30,
+  "resolutions": [1080, 720],
+  "intro": {
+    "duration": 2.5,
+    "background": { "type": "gradient", "from": "#1b1b3a", "to": "#ff5a36", "angle": 20 },
+    "layers": [
+      { "type": "image", "asset": "logo.svg", "x": 0.5, "y": 0.38, "width": 0.6, "animation": "pop", "animationDuration": 0.5 },
+      { "type": "text", "text": "Nossa história em 1 minuto", "x": 0.5, "y": 0.55, "fontSize": 0.045, "maxWidth": 0.8, "start": 0.4, "animation": "slide-up" }
+    ]
+  },
+  "slots": [
+    {
+      "id": "apresentacao",
+      "label": "Quem é você",
+      "script": "Oi! Eu sou [seu nome] e trabalho com [sua área] há [tempo].\nHoje vou contar em poucos segundos como a gente começou.",
+      "minDuration": 4,
+      "maxDuration": 20,
+      "layers": [
+        { "type": "text", "text": "{{slot.label}}", "x": 0.06, "y": 0.86, "align": "left", "fontSize": 0.03, "fontWeight": 800, "background": { "color": "#ff5a36", "padding": 0.012 }, "start": 0.5, "end": 4.5, "animation": "slide-up" }
+      ]
+    },
+    {
+      "id": "desafio",
+      "label": "O desafio",
+      "script": "O maior desafio foi [descreva o problema].\nA gente tentou [o que não funcionou] até encontrar um caminho melhor.",
+      "minDuration": 5,
+      "maxDuration": 25,
+      "layers": [
+        { "type": "text", "text": "{{slot.label}}", "x": 0.06, "y": 0.86, "align": "left", "fontSize": 0.03, "fontWeight": 800, "background": { "color": "#ff5a36", "padding": 0.012 }, "start": 0.5, "end": 4.5, "animation": "slide-up" }
+      ]
+    },
+    {
+      "id": "resultado",
+      "label": "O resultado",
+      "script": "Hoje [o resultado, com um número se tiver].\nSe você também quer isso, fala com a gente!",
+      "minDuration": 4,
+      "maxDuration": 20,
+      "layers": [
+        { "type": "text", "text": "{{slot.label}}", "x": 0.06, "y": 0.86, "align": "left", "fontSize": 0.03, "fontWeight": 800, "background": { "color": "#ff5a36", "padding": 0.012 }, "start": 0.5, "end": 4.5, "animation": "slide-up" }
+      ]
+    }
+  ],
+  "outro": {
+    "duration": 3,
+    "background": { "type": "color", "color": "#1b1b3a" },
+    "layers": [
+      { "type": "image", "asset": "logo.svg", "x": 0.5, "y": 0.42, "width": 0.55, "animation": "fade" },
+      { "type": "text", "text": "Siga para mais histórias", "x": 0.5, "y": 0.56, "fontSize": 0.04, "color": "#ffd2c6", "start": 0.3, "animation": "slide-up" }
+    ]
+  },
+  "logo": { "asset": "logo.svg", "position": "top-right", "width": 0.26, "margin": 0.05, "opacity": 0.85, "showOn": "slots" },
+  "music": { "asset": "trilha-leve.wav", "volume": 0.55, "duckedVolume": 0.1, "duckRamp": 0.4, "fadeIn": 0.8, "fadeOut": 1.5, "loop": true },
+  "transition": { "type": "fade-black", "duration": 0.25 },
+  "audio": { "targetRmsDb": -20, "maxGainDb": 12 }
+}

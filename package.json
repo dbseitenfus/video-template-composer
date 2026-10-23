@@ -1,0 +1,29 @@
+{
+  "name": "takeslot",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "tools/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @takeslot/web",
+    "build": "npm run build -w @takeslot/web",
+    "bench": "npm run dev -w @takeslot/bench",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "npm run test:e2e -w @takeslot/web",
+    "gen:music": "node packages/templates/scripts/gen-music.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "jsdom": "^27.0.0",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

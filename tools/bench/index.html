@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Takeslot · benchmark</title>
+    <link rel="icon" href="data:," />
+    <style>
+      :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #15152b; color: #f3f2f8; }
+      body { margin: 0; }
+      main { width: min(760px, 100%); margin: 0 auto; padding: 1rem; display: grid; gap: 1rem; }
+      fieldset { border: 1px solid #33335a; border-radius: 12px; display: flex; flex-wrap: wrap; gap: 1rem; }
+      label { display: grid; gap: 0.25rem; font-size: 0.9rem; }
+      select, input { font: inherit; padding: 0.3rem; }
+      button { font: inherit; font-weight: 600; border: 0; border-radius: 999px; padding: 0.7rem 1.4rem; background: #ff5a36; color: #fff; }
+      button:disabled { opacity: 0.5; }
+      table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 0.9rem; }
+      th, td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid #33335a; }
+      .pass { color: #3ccf91; font-weight: 700; }
+      .fail { color: #ff5c6c; font-weight: 700; }
+      pre { white-space: pre-wrap; background: #1f1f3d; padding: 0.75rem; border-radius: 10px; font-size: 0.8rem; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Benchmark de exportação</h1>
+      <p>
+        Gera takes sintéticos e roda o pipeline real (decode → renderFrame → encode → mux) neste aparelho.
+        Gate da fase 0: exportar 60 s em até 2 minutos no Android de entrada.
+      </p>
+      <fieldset>
+        <label>Template <select id="template"></select></label>
+        <label>Resolução <select id="resolution"><option>720</option><option>1080</option></select></label>
+        <label>Duração do vídeo (s) <input id="duration" type="number" value="60" min="10" max="180" /></label>
+        <label>Exportações seguidas <input id="runs" type="number" value="1" min="1" max="10" /></label>
+      </fieldset>
+      <div><button id="start">Rodar</button></div>
+      <p id="status"></p>
+      <table>
+        <thead><tr><th>#</th><th>Tempo</th><th>Velocidade</th><th>Tamanho</th><th>Memória JS</th><th>Gate</th></tr></thead>
+        <tbody id="results"></tbody>
+      </table>
+      <pre id="env"></pre>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

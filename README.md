@@ -187,8 +187,46 @@ Os valores são aproximados e devem ser conferidos nas páginas de preço antes 
 
 **Próximos passos**
 
-- [ ] Criar o repositório `takeslot` com a estrutura do monorepo
+- [x] Criar o repositório `takeslot` com a estrutura do monorepo
 - [ ] Escrever a prova de conceito da fase 0
 - [ ] Separar os quatro aparelhos de referência para teste
 - [ ] Definir o primeiro template real (slots, textos e trilha)
 - [ ] Rodar o benchmark e decidir, no gate da fase 0, se o plano segue no cliente
+
+## Como rodar
+
+Requer Node 20+. O monorepo usa npm workspaces (`apps/web`, `packages/*`, `tools/bench`).
+
+```bash
+npm install
+npm run dev          # app em http://localhost:5173
+npm run bench        # página de benchmark (fase 0), exposta na rede local para testar no celular
+npm test             # testes unitários (Vitest + Vue Test Utils)
+npm run typecheck    # tsc / vue-tsc em todos os pacotes
+npm run build        # build de produção do app (PWA) em apps/web/dist
+```
+
+Para o teste ponta a ponta (grava com câmera falsa, exporta e testa a retomada), use o Chrome instalado, que tem AAC:
+
+```bash
+PW_CHANNEL=chrome npm run test:e2e
+```
+
+Sem `PW_CHANNEL`, o Playwright usa o próprio Chromium (`npx playwright install chromium`), e o áudio sai em Opus.
+
+A câmera e o OPFS exigem contexto seguro: no celular, abra o app por HTTPS (ou pelo deploy de preview do Cloudflare Pages). O deploy é o conteúdo de `apps/web/dist`; `_redirects` e `_headers` já estão em `apps/web/public`.
+
+**Onde está cada parte do pipeline**
+
+| Etapa | Arquivo |
+| --- | --- |
+| Schema e tipos do template | `packages/schema/src/index.ts` |
+| Linha do tempo e `renderFrame` (preview e exportação) | `packages/engine/src/timeline.ts`, `packages/engine/src/render.ts` |
+| Mixagem (ducking, fades, normalização) | `packages/engine/src/audio-plan.ts`, `packages/engine/src/audio-mix.ts` |
+| Amostragem por timestamp, encode, checkpoint e união dos pedaços | `packages/engine/src/sampler.ts`, `packages/engine/src/export.ts` |
+| Worker de exportação (OPFS + Comlink) | `apps/web/src/workers/export.worker.ts` |
+| Gravação em pedaços no OPFS | `apps/web/src/composables/useRecorder.ts` |
+| Templates e assets | `packages/templates/templates/*.json`, `packages/templates/assets/` |
+
+A trilha de exemplo (`trilha-leve.wav`) é gerada por `npm run gen:music`. A telemetria de erros só envia algo se `VITE_TELEMETRY_URL` estiver definido.
+
