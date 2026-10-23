@@ -46,6 +46,17 @@
       ]
     }
   ],
+  "clips": [
+    {
+      "id": "vinheta",
+      "label": "Vinheta",
+      "asset": "vinheta-marca.mp4",
+      "after": "desafio",
+      "duration": 4,
+      "volume": 0.8,
+      "duckMusic": true
+    }
+  ],
   "outro": {
     "duration": 3,
     "background": { "type": "color", "color": "#1b1b3a" },

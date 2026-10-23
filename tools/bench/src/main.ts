@@ -23,7 +23,8 @@ const worker = Comlink.wrap<BenchWorkerApi>(new Worker(new URL('./bench.worker.t
 /** Distribui a duração pedida entre os slots, respeitando o máximo de cada um. */
 function takeDurations(entry: (typeof templates)[number], total: number): Record<string, number> {
   const t = entry.template
-  let remaining = Math.max(t.slots.length * 2, total - (t.intro?.duration ?? 0) - (t.outro?.duration ?? 0))
+  const fixed = (t.intro?.duration ?? 0) + (t.outro?.duration ?? 0) + t.clips.reduce((s, c) => s + c.duration, 0)
+  let remaining = Math.max(t.slots.length * 2, total - fixed)
   const out: Record<string, number> = {}
   t.slots.forEach((slot, i) => {
     const share = remaining / (t.slots.length - i)
@@ -63,11 +64,17 @@ async function run() {
         const bytes = await worker.readFile(takePaths[slot.id]!)
         takeAudio[slot.id] = bytes ? await decodeTakeAudio(new Blob([bytes as Uint8Array<ArrayBuffer>])) : null
       }
+      const clipFiles: Record<string, Blob> = {}
+      const clipAudio: Record<string, AudioBuffer | null> = {}
+      for (const clip of template.clips) {
+        clipFiles[clip.id] = await (await fetch(entry.assets[clip.asset]!)).blob()
+        clipAudio[clip.id] = await decodeTakeAudio(clipFiles[clip.id]!)
+      }
       const music = template.music ? await decodeAudioUrl(entry.assets[template.music.asset]!) : null
-      const audio = await mixAudio({ template, timeline, takes: takeAudio, music })
+      const audio = await mixAudio({ template, timeline, takes: takeAudio, clips: clipAudio, music })
       const images = await loadImageBitmaps(Object.fromEntries(templateAssets(template).images.map((n) => [n, entry.assets[n]!])))
 
-      const job: ExportJob = { id: `bench-${i}`, template, takeDurations: durations, takePaths, resolution, images, audio }
+      const job: ExportJob = { id: `bench-${i}`, template, takeDurations: durations, takePaths, clipFiles, resolution, images, audio }
       let row: HTMLTableRowElement | null = null
       try {
         const result = await worker.run(

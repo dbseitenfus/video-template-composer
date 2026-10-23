@@ -1,5 +1,5 @@
 import type { Background, ImageLayer, Layer, Logo, Template, TextLayer } from '@takeslot/schema'
-import { locate, type Segment, type Timeline } from './timeline'
+import { locate, videoLayout, type Segment, type Timeline } from './timeline'
 
 export type Ctx2D = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
 
@@ -23,7 +23,7 @@ export interface SizedImage {
 
 export interface RenderSources {
   timeline: Timeline
-  /** Frame do slot ativo; `null` quando o segmento não é um slot ou o frame ainda não está pronto. */
+  /** Frame do take ou clipe ativo; `null` quando o segmento não tem vídeo ou o frame ainda não está pronto. */
   frame?: FrameSource | null
   /** Imagens do template já decodificadas, por nome do asset. */
   images: Record<string, SizedImage | undefined>
@@ -48,15 +48,18 @@ export function renderFrame(ctx: Ctx2D, template: Template, t: number, sources: 
   }
   const { segment, local } = located
 
-  if (segment.kind === 'slot') {
-    ctx.fillStyle = segment.slot.background
+  let label = ''
+  if (segment.kind === 'slot' || segment.kind === 'clip') {
+    const layout = videoLayout(segment)
+    label = layout.label
+    ctx.fillStyle = layout.background
     ctx.fillRect(0, 0, W, H)
-    if (sources.frame) drawFrame(ctx, sources.frame, segment.slot.fit, W, H)
+    if (sources.frame) drawFrame(ctx, sources.frame, layout.fit, W, H)
   } else {
     drawBackground(ctx, segment.background, W, H)
   }
 
-  const vars = { 'template.name': template.name, 'slot.label': segment.kind === 'slot' ? segment.slot.label : '' }
+  const vars = { 'template.name': template.name, 'slot.label': label }
   for (const layer of segment.layers) drawLayer(ctx, layer, local, segment.duration, W, H, sources.images, vars)
 
   if (template.logo && (template.logo.showOn === 'all' || segment.kind === 'slot')) {

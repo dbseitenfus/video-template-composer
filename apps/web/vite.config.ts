@@ -23,6 +23,20 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,wav,webmanifest}'],
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
         navigateFallback: 'index.html',
+        // Clipes fixos dos templates: baixados na primeira vez que são usados e guardados para uso offline.
+        // Ficam fora do precache para não baixar os vídeos de todos os templates na instalação.
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.endsWith('.mp4'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'template-clips',
+              rangeRequests: true,
+              cacheableResponse: { statuses: [200] },
+              expiration: { maxEntries: 30 },
+            },
+          },
+        ],
       },
     }),
   ],

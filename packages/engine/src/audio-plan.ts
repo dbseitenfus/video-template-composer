@@ -1,5 +1,5 @@
 import type { Template } from '@takeslot/schema'
-import type { Timeline } from './timeline'
+import type { Segment, Timeline } from './timeline'
 
 export interface GainKeyframe {
   time: number
@@ -7,7 +7,7 @@ export interface GainKeyframe {
 }
 
 /**
- * Curva de volume da trilha: fade-in, ducking durante as falas e fade-out.
+ * Curva de volume da trilha: fade-in, ducking durante as falas (e clipes com `duckMusic`) e fade-out.
  * As rampas são lineares entre keyframes. O mix offline e o preview usam a mesma curva.
  */
 export function musicGainKeyframes(template: Template, timeline: Timeline): GainKeyframe[] {
@@ -15,26 +15,28 @@ export function musicGainKeyframes(template: Template, timeline: Timeline): Gain
   if (!music || timeline.duration <= 0) return []
   const total = timeline.duration
   const ramp = music.duckRamp
-  const level = (kind: string) => (kind === 'slot' ? music.duckedVolume : music.volume)
+  // A trilha abaixa nas falas e nos clipes com `duckMusic`.
+  const level = (seg: Segment | undefined) =>
+    seg?.kind === 'slot' || (seg?.kind === 'clip' && seg.clip.duckMusic) ? music.duckedVolume : music.volume
 
   const points: GainKeyframe[] = []
   const first = timeline.segments[0]
-  points.push({ time: 0, gain: music.fadeIn > 0 ? 0 : level(first?.kind ?? 'intro') })
+  points.push({ time: 0, gain: music.fadeIn > 0 ? 0 : level(first) })
 
   for (let i = 0; i < timeline.segments.length; i++) {
     const seg = timeline.segments[i]!
     const prev = timeline.segments[i - 1]
-    const target = level(seg.kind)
+    const target = level(seg)
     if (i === 0) {
       points.push({ time: Math.min(music.fadeIn, seg.duration), gain: target })
       continue
     }
-    if (prev && level(prev.kind) !== target) {
+    if (prev && level(prev) !== target) {
       // Desce a trilha um pouco antes da fala começar e sobe logo depois que ela termina.
-      const ducking = target < level(prev.kind)
+      const ducking = target < level(prev)
       const from = ducking ? seg.start - ramp : seg.start
       const to = ducking ? seg.start : seg.start + ramp
-      points.push({ time: Math.max(0, from), gain: level(prev.kind) })
+      points.push({ time: Math.max(0, from), gain: level(prev) })
       points.push({ time: Math.min(total, to), gain: target })
     }
   }
@@ -42,12 +44,12 @@ export function musicGainKeyframes(template: Template, timeline: Timeline): Gain
   const last = timeline.segments[timeline.segments.length - 1]!
   if (music.fadeOut > 0) {
     const fadeStart = Math.max(0, total - music.fadeOut)
-    const atFade = gainAt(normalizeKeyframes(points), fadeStart, level(last.kind))
+    const atFade = gainAt(normalizeKeyframes(points), fadeStart, level(last))
     const before = points.filter((p) => p.time < fadeStart)
     points.length = 0
     points.push(...before, { time: fadeStart, gain: atFade }, { time: total, gain: 0 })
   } else {
-    points.push({ time: total, gain: level(last.kind) })
+    points.push({ time: total, gain: level(last) })
   }
   return normalizeKeyframes(points)
 }

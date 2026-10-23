@@ -74,6 +74,8 @@ export interface MixInput {
   timeline: Timeline
   /** Áudio decodificado de cada take, por id do slot. */
   takes: Record<string, AudioBuffer | null | undefined>
+  /** Áudio decodificado de cada clipe fixo, por id do clipe. */
+  clips?: Record<string, AudioBuffer | null | undefined>
   music?: AudioBuffer | null
   sampleRate?: number
   numberOfChannels?: number
@@ -91,8 +93,8 @@ export function takeGains(template: Template, takes: MixInput['takes']): Record<
 }
 
 /**
- * Mixa falas e trilha pelo tempo absoluto da linha do tempo:
- * cada fala entra no início do seu segmento e é cortada no fim dele.
+ * Mixa falas, clipes e trilha pelo tempo absoluto da linha do tempo:
+ * cada fala ou clipe entra no início do seu segmento e é cortado no fim dele.
  */
 export async function mixAudio(input: MixInput): Promise<MixedAudio> {
   const { template, timeline } = input
@@ -128,6 +130,26 @@ export async function mixAudio(input: MixInput): Promise<MixedAudio> {
     gain.gain.linearRampToValueAtTime(0, end)
     src.connect(gain).connect(master)
     src.start(start, 0, segment.duration)
+  }
+
+  // Clipes fixos: tocam no volume definido no template, sem normalização (já vêm masterizados).
+  for (const segment of timeline.segments) {
+    if (segment.kind !== 'clip' || segment.clip.volume <= 0) continue
+    const buffer = input.clips?.[segment.clip.id]
+    if (!buffer) continue
+    const src = ctx.createBufferSource()
+    src.buffer = buffer
+    const gain = ctx.createGain()
+    const level = segment.clip.volume
+    const start = segment.start
+    const end = segment.start + segment.duration
+    const fade = Math.min(VOICE_EDGE_FADE, segment.duration / 4)
+    gain.gain.setValueAtTime(0, start)
+    gain.gain.linearRampToValueAtTime(level, start + fade)
+    gain.gain.setValueAtTime(level, end - fade)
+    gain.gain.linearRampToValueAtTime(0, end)
+    src.connect(gain).connect(master)
+    src.start(start, segment.clip.trimStart, segment.duration)
   }
 
   if (template.music && input.music) {

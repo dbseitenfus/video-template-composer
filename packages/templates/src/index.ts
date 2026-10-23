@@ -18,8 +18,8 @@ function assetUrl(name: string): string {
 
 function entry(raw: unknown): TemplateEntry {
   const template = parseTemplate(raw)
-  const { images, audio } = templateAssets(template)
-  return { template, assets: Object.fromEntries([...images, ...audio].map((name) => [name, assetUrl(name)])) }
+  const { images, audio, videos } = templateAssets(template)
+  return { template, assets: Object.fromEntries([...images, ...audio, ...videos].map((name) => [name, assetUrl(name)])) }
 }
 
 export const templates: TemplateEntry[] = [entry(depoimentoVertical), entry(apresentacaoHorizontal)]

@@ -48,8 +48,18 @@ export function useExport() {
       if (!file) throw new Error(`O take de "${slot.label}" não está mais no aparelho. Grave de novo.`)
       takeAudio[slot.id] = await decodeTakeAudio(file)
     }
+    // Clipes fixos: baixados aqui (com cache do service worker) e enviados ao Worker como Blob.
+    const clipFiles: Record<string, Blob> = {}
+    const clipAudio: Record<string, AudioBuffer | null> = {}
+    for (const clip of template.clips) {
+      const response = await fetch(entry.assets[clip.asset]!)
+      if (!response.ok) throw new Error(`Não foi possível baixar o vídeo "${clip.label}"`)
+      clipFiles[clip.id] = await response.blob()
+      clipAudio[clip.id] = clip.volume > 0 ? await decodeTakeAudio(clipFiles[clip.id]!) : null
+    }
+
     const music = template.music ? await decodeAudioUrl(entry.assets[template.music.asset]!) : null
-    const audio = await mixAudio({ template, timeline, takes: takeAudio, music })
+    const audio = await mixAudio({ template, timeline, takes: takeAudio, clips: clipAudio, music })
 
     const { images } = templateAssets(template)
     const bitmaps = await loadImageBitmaps(Object.fromEntries(images.map((name) => [name, entry.assets[name]!])))
@@ -59,6 +69,7 @@ export function useExport() {
       template,
       takeDurations: project.takeDurations,
       takePaths,
+      clipFiles,
       resolution,
       images: bitmaps,
       audio,

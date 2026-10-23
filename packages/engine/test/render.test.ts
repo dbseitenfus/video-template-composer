@@ -55,6 +55,21 @@ describe('renderFrame', () => {
     expect(draw!.args[4]).toBeCloseTo(192)
   })
 
+  it('desenha o frame do clipe com o enquadramento e o rótulo do clipe', () => {
+    const t = makeTemplate({
+      clips: [{ id: 'v', label: 'Vinheta', asset: 'v.mp4', after: 'a', duration: 2, fit: 'contain', background: '#123456', layers: [{ type: 'text', text: '{{slot.label}}', x: 0.5, y: 0.5, animation: 'none' }] }],
+    })
+    const tl = buildTimeline(t, { a: 4, b: 3 })
+    const { ctx, calls } = fakeCtx()
+    const image = {} as CanvasImageSource
+    renderFrame(ctx, t, 7, { timeline: tl, images: {}, frame: { image, width: 1920, height: 1080 } })
+    expect(calls.some((c) => c.op === 'fillRect' && c.fillStyle === '#123456')).toBe(true)
+    const draw = calls.find((c) => c.op === 'drawImage' && c.args[0] === image)!
+    // contain: largura preenche o canvas de 108 px
+    expect(draw.args[3]).toBeCloseTo(108)
+    expect(calls.find((c) => c.op === 'fillText')?.args[0]).toBe('Vinheta')
+  })
+
   it('é determinística: mesmas entradas, mesmas chamadas', () => {
     const a = fakeCtx()
     const b = fakeCtx()

@@ -22,7 +22,7 @@ onMounted(async () => {
 
 function totalRange(id: string) {
   const t = templates.find((e) => e.template.id === id)!.template
-  const fixed = (t.intro?.duration ?? 0) + (t.outro?.duration ?? 0)
+  const fixed = (t.intro?.duration ?? 0) + (t.outro?.duration ?? 0) + t.clips.reduce((s, c) => s + c.duration, 0)
   const max = fixed + t.slots.reduce((s, slot) => s + slot.maxDuration, 0)
   return `até ${formatDuration(max)}`
 }

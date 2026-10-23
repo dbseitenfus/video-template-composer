@@ -228,5 +228,17 @@ A câmera e o OPFS exigem contexto seguro: no celular, abra o app por HTTPS (ou 
 | Gravação em pedaços no OPFS | `apps/web/src/composables/useRecorder.ts` |
 | Templates e assets | `packages/templates/templates/*.json`, `packages/templates/assets/` |
 
-A trilha de exemplo (`trilha-leve.wav`) é gerada por `npm run gen:music`. A telemetria de erros só envia algo se `VITE_TELEMETRY_URL` estiver definido.
+**Vídeos fixos no meio do template**
+
+Um template pode ter clipes fixos (vinheta, trecho institucional) entre os trechos gravados, em `clips`. Cada clipe diz depois de qual trecho entra (`after`: `"intro"` ou o id de um slot) e quanto dele é usado:
+
+```json
+"clips": [
+  { "id": "vinheta", "label": "Vinheta", "asset": "vinheta-marca.mp4", "after": "desafio", "duration": 4, "volume": 0.8, "duckMusic": true }
+]
+```
+
+Opcionais: `trimStart` (segundos), `fit` (`cover` ou `contain`), `background` e `layers` (textos e imagens por cima, como nos slots). O arquivo vai em `packages/templates/assets/` e deve ser MP4 H.264/AAC, na proporção do template e com pelo menos a duração declarada. O app baixa o clipe na primeira exportação e o guarda em cache para uso offline; ele fica fora do precache para não baixar os vídeos de todos os templates na instalação.
+
+A trilha de exemplo (`trilha-leve.wav`) é gerada por `npm run gen:music`, e a vinheta de exemplo (`vinheta-marca.mp4`) por `npm run gen:clip` (usa o Chrome instalado). A telemetria de erros só envia algo se `VITE_TELEMETRY_URL` estiver definido.
 

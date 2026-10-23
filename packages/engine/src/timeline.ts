@@ -1,6 +1,6 @@
-import type { Background, Layer, Slot, Template } from '@takeslot/schema'
+import type { Background, Clip, Layer, Slot, Template } from '@takeslot/schema'
 
-export type SegmentKind = 'intro' | 'slot' | 'outro'
+export type SegmentKind = 'intro' | 'slot' | 'clip' | 'outro'
 
 interface BaseSegment {
   index: number
@@ -21,7 +21,28 @@ export interface SlotSegment extends BaseSegment {
   slot: Slot
 }
 
-export type Segment = CardSegment | SlotSegment
+export interface ClipSegment extends BaseSegment {
+  kind: 'clip'
+  clip: Clip
+}
+
+export type Segment = CardSegment | SlotSegment | ClipSegment
+
+/** Segmentos com vídeo (take gravado ou clipe fixo). */
+export type VideoSegment = SlotSegment | ClipSegment
+
+/** Chave da fonte de vídeo de um segmento: id do slot ou `clip:<id>`. */
+export function videoKey(segment: VideoSegment): string {
+  return segment.kind === 'slot' ? segment.slot.id : clipKey(segment.clip.id)
+}
+
+export const clipKey = (clipId: string) => `clip:${clipId}`
+
+/** Dados comuns de enquadramento de um segmento com vídeo. */
+export function videoLayout(segment: VideoSegment) {
+  const source = segment.kind === 'slot' ? segment.slot : segment.clip
+  return { fit: source.fit, background: source.background, label: source.label }
+}
 
 export interface Timeline {
   fps: number
@@ -41,7 +62,8 @@ export class MissingTakeError extends Error {
 }
 
 /**
- * Monta a linha do tempo: abertura, um segmento por slot e encerramento.
+ * Monta a linha do tempo: abertura, um segmento por slot (com os clipes fixos
+ * logo depois do slot indicado em `after`) e encerramento.
  * Os takes são cortados em `maxDuration`; os limites caem em frames inteiros
  * para que preview e exportação concordem no frame de cada troca.
  */
@@ -51,19 +73,29 @@ export function buildTimeline(template: Template, takes: TakeDurations): Timelin
   const segments: Segment[] = []
   let cursor = 0
 
-  const push = (segment: Omit<CardSegment, 'index' | 'start'> | Omit<SlotSegment, 'index' | 'start'>) => {
+  const push = (
+    segment: Omit<CardSegment, 'index' | 'start'> | Omit<SlotSegment, 'index' | 'start'> | Omit<ClipSegment, 'index' | 'start'>,
+  ) => {
     const duration = snap(segment.duration)
     segments.push({ ...segment, index: segments.length, start: cursor, duration } as Segment)
     cursor = Math.round((cursor + duration) * fps) / fps
   }
 
+  const pushClipsAfter = (after: string) => {
+    for (const clip of template.clips) {
+      if (clip.after === after) push({ kind: 'clip', duration: clip.duration, layers: clip.layers, clip })
+    }
+  }
+
   if (template.intro) {
     push({ kind: 'intro', duration: template.intro.duration, layers: template.intro.layers, background: template.intro.background })
   }
+  pushClipsAfter('intro')
   for (const slot of template.slots) {
     const take = takes[slot.id]
     if (take === undefined || !(take > 0)) throw new MissingTakeError(slot.id)
     push({ kind: 'slot', duration: Math.min(take, slot.maxDuration), layers: slot.layers, slot })
+    pushClipsAfter(slot.id)
   }
   if (template.outro) {
     push({ kind: 'outro', duration: template.outro.duration, layers: template.outro.layers, background: template.outro.background })

@@ -28,6 +28,20 @@ describe('buildTimeline', () => {
   })
 })
 
+describe('clipes fixos', () => {
+  const clip = (id: string, after: string, duration = 2) => ({ id, label: id, asset: `${id}.mp4`, after, duration })
+
+  it('entram depois do slot indicado, na ordem do template', () => {
+    const t = makeTemplate({ clips: [clip('v1', 'a'), clip('v0', 'intro', 1), clip('v2', 'a', 1.5)] })
+    const tl = buildTimeline(t, { a: 4, b: 3 })
+    expect(tl.segments.map((s) => (s.kind === 'clip' ? s.clip.id : s.kind))).toEqual(['intro', 'v0', 'slot', 'v1', 'v2', 'slot', 'outro'])
+    expect(tl.duration).toBeCloseTo(2 + 1 + 4 + 2 + 1.5 + 3 + 3)
+    const v1 = tl.segments[3]!
+    expect(v1.start).toBeCloseTo(7)
+    expect(locate(tl, 7.5)?.segment.kind).toBe('clip')
+  })
+})
+
 describe('locate', () => {
   const tl = buildTimeline(makeTemplate(), { a: 4, b: 3 })
 

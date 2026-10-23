@@ -50,7 +50,20 @@ describe('TemplateSchema', () => {
       music: { asset: 'trilha.wav' },
       outro: { duration: 2, background: { type: 'color', color: '#000' }, layers: [{ type: 'image', asset: 'selo.png', x: 0.5, y: 0.5, width: 0.3 }] },
     })
-    expect(templateAssets(t)).toEqual({ images: ['selo.png', 'logo.svg'], audio: ['trilha.wav'] })
+    expect(templateAssets(t)).toEqual({ images: ['selo.png', 'logo.svg'], audio: ['trilha.wav'], videos: [] })
+  })
+
+  it('aceita clipes fixos e valida o "after"', () => {
+    const clip = { id: 'vinheta', label: 'Vinheta', asset: 'v.mp4', after: 'fala-1', duration: 3 }
+    const t = parseTemplate({ ...minimal, clips: [clip] })
+    expect(t.clips[0]).toMatchObject({ trimStart: 0, volume: 1, duckMusic: true, fit: 'cover' })
+    expect(templateAssets(t).videos).toEqual(['v.mp4'])
+    expect(parseTemplate({ ...minimal, clips: [{ ...clip, after: 'intro' }] }).clips).toHaveLength(1)
+
+    const bad = safeParseTemplate({ ...minimal, clips: [{ ...clip, after: 'nao-existe' }] })
+    expect(bad.success).toBe(false)
+    const dup = safeParseTemplate({ ...minimal, clips: [{ ...clip, id: 'fala-1' }] })
+    expect(dup.success).toBe(false)
   })
 
   it('calcula tamanhos pares de saída', () => {

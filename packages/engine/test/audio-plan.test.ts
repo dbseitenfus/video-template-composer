@@ -38,6 +38,23 @@ describe('musicGainKeyframes', () => {
   })
 })
 
+describe('trilha com clipes', () => {
+  const clip = { id: 'v', label: 'V', asset: 'v.mp4', after: 'a', duration: 2 }
+
+  it('mantém a trilha baixa durante um clipe com duckMusic', () => {
+    const t = makeTemplate({ clips: [clip] }) // intro 0–2, a 2–6, clipe 6–8, b 8–11, outro 11–14
+    const k = musicGainKeyframes(t, buildTimeline(t, { a: 4, b: 3 }))
+    expect(gainAt(k, 7)).toBeCloseTo(0.1)
+  })
+
+  it('sobe a trilha no clipe sem duckMusic e volta a abaixar na fala seguinte', () => {
+    const t = makeTemplate({ clips: [{ ...clip, duckMusic: false }] })
+    const k = musicGainKeyframes(t, buildTimeline(t, { a: 4, b: 3 }))
+    expect(gainAt(k, 7)).toBeCloseTo(0.6)
+    expect(gainAt(k, 8.6)).toBeCloseTo(0.1)
+  })
+})
+
 describe('normalização', () => {
   const sine = (amp: number) => Float32Array.from({ length: 48000 }, (_, i) => amp * Math.sin((2 * Math.PI * 440 * i) / 48000))
 

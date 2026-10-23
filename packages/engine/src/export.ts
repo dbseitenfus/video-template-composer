@@ -23,7 +23,7 @@ import type { MixedAudio } from './audio-mix'
 import { renderFrame, type Ctx2D, type FrameSource, type RenderSources, type Rotation } from './render'
 import { TimestampSampler } from './sampler'
 import { mergeByTimestamp, planChunks, type ExportChunk } from './segments'
-import { buildTimeline, frameTime, locate, type TakeDurations, type Timeline } from './timeline'
+import { buildTimeline, clipKey, frameTime, locate, videoKey, type TakeDurations, type Timeline } from './timeline'
 
 /*
  * Pipeline de exportação: decode → renderFrame → encode → mux.
@@ -47,6 +47,8 @@ export interface ExportJob {
   takeDurations: TakeDurations
   /** Caminho do arquivo de cada take no armazenamento, por id do slot. */
   takePaths: Record<string, string>
+  /** Arquivo de cada clipe fixo do template, por id do clipe (baixado na thread principal). */
+  clipFiles?: Record<string, Blob>
   resolution: Resolution
   /** Imagens do template já rasterizadas na thread principal. */
   images: Record<string, ImageBitmap>
@@ -156,28 +158,28 @@ export async function chooseVideoConfig(width: number, height: number, fps: numb
   throw new Error(`Este aparelho não codifica H.264 em ${width}×${height}`)
 }
 
-/** Lê os frames dos takes, mantendo um único take aberto por vez. */
-class TakeReader {
-  private open: { slotId: string; input: Input; sampler: TimestampSampler<VideoSample>; rotation: Rotation } | null = null
+/**
+ * Lê os frames de takes e clipes, mantendo uma única fonte aberta por vez.
+ * A chave é o id do slot ou `clip:<id>` (ver `videoKey`).
+ */
+class VideoReader {
+  private open: { key: string; input: Input; sampler: TimestampSampler<VideoSample>; rotation: Rotation } | null = null
 
-  constructor(
-    private readonly storage: ExportStorage,
-    private readonly paths: Record<string, string>,
-  ) {}
+  constructor(private readonly resolve: (key: string) => Promise<Blob | null>) {}
 
-  async frameAt(slotId: string, local: number): Promise<{ sample: VideoSample; rotation: Rotation } | null> {
-    if (this.open?.slotId !== slotId) {
+  /** @param local tempo dentro do arquivo, já somado ao `trimStart` no caso de clipes */
+  async frameAt(key: string, local: number): Promise<{ sample: VideoSample; rotation: Rotation } | null> {
+    if (this.open?.key !== key) {
       this.close()
-      const path = this.paths[slotId]
-      const blob = path ? await this.storage.read(path) : null
-      if (!blob) throw new Error(`Take do slot "${slotId}" não encontrado`)
+      const blob = await this.resolve(key)
+      if (!blob) throw new Error(`Vídeo "${key}" não encontrado`)
       const input = new Input({ source: new BlobSource(blob), formats: ALL_FORMATS })
       const track = await input.getPrimaryVideoTrack()
-      if (!track) throw new Error(`O take do slot "${slotId}" não tem vídeo`)
+      if (!track) throw new Error(`O arquivo "${key}" não tem vídeo`)
       const base = await track.getFirstTimestamp()
       const sink = new VideoSampleSink(track)
       const sampler = new TimestampSampler(sink.samples(base + local)[Symbol.asyncIterator](), base)
-      this.open = { slotId, input, sampler, rotation: track.rotation }
+      this.open = { key, input, sampler, rotation: track.rotation }
     }
     const sample = await this.open.sampler.at(local)
     return sample ? { sample, rotation: this.open.rotation } : null
@@ -197,7 +199,7 @@ interface RenderContext {
   ctx: OffscreenCanvasRenderingContext2D
   canvas: OffscreenCanvas
   images: RenderSources['images']
-  reader: TakeReader
+  reader: VideoReader
 }
 
 async function drawFrameAt(rc: RenderContext, n: number): Promise<void> {
@@ -205,8 +207,10 @@ async function drawFrameAt(rc: RenderContext, n: number): Promise<void> {
   const located = locate(rc.timeline, t)
   let frame: FrameSource | null = null
   let sample: VideoSample | null = null
-  if (located?.segment.kind === 'slot') {
-    const hit = await rc.reader.frameAt(located.segment.slot.id, located.local)
+  const segment = located?.segment
+  if (located && (segment?.kind === 'slot' || segment?.kind === 'clip')) {
+    const offset = segment.kind === 'clip' ? segment.clip.trimStart : 0
+    const hit = await rc.reader.frameAt(videoKey(segment), located.local + offset)
     if (hit) {
       sample = hit.sample
       // `toCanvasImageSource` precisa ser usado na mesma tarefa: nada de await até o desenho.
@@ -225,7 +229,13 @@ function createRenderContext(job: ExportJob, storage: ExportStorage) {
   if (!ctx) throw new Error('OffscreenCanvas 2D indisponível')
   const images: RenderSources['images'] = {}
   for (const [name, bitmap] of Object.entries(job.images)) images[name] = { image: bitmap, width: bitmap.width, height: bitmap.height }
-  const rc: RenderContext = { template, timeline, ctx, canvas, images, reader: new TakeReader(storage, job.takePaths) }
+  const resolve = async (key: string): Promise<Blob | null> => {
+    const clip = template.clips.find((c) => clipKey(c.id) === key)
+    if (clip) return job.clipFiles?.[clip.id] ?? null
+    const path = job.takePaths[key]
+    return path ? storage.read(path) : null
+  }
+  const rc: RenderContext = { template, timeline, ctx, canvas, images, reader: new VideoReader(resolve) }
   return { rc, width, height }
 }
 
@@ -422,6 +432,7 @@ function fingerprint(job: ExportJob, chunks: ExportChunk[]): string {
     resolution: job.resolution,
     takes: job.takePaths,
     durations: job.takeDurations,
+    clips: job.template.clips.map((c) => [c.id, c.asset, c.trimStart, c.duration, c.after]),
     chunks: chunks.map((c) => [c.startFrame, c.endFrame]),
     audio: job.audio ? job.audio.channels[0]?.length : 0,
   })
@@ -556,8 +567,8 @@ export async function benchmark(job: ExportJob, storage: ExportStorage, seconds 
   const fps = rc.timeline.fps
   const frames = Math.min(rc.timeline.totalFrames, Math.max(1, Math.round(seconds * fps)))
   const config = await chooseVideoConfig(width, height, fps, job.videoBitrate ?? defaultBitrate(width, height, fps))
-  // Começa no primeiro slot: é o caso caro (decode + composição), a abertura só desenha cartões.
-  const firstSlot = rc.timeline.segments.find((s) => s.kind === 'slot')
+  // Começa no primeiro trecho com vídeo: é o caso caro (decode + composição), a abertura só desenha cartões.
+  const firstSlot = rc.timeline.segments.find((s) => s.kind === 'slot' || s.kind === 'clip')
   const start = firstSlot ? Math.min(Math.round(firstSlot.start * fps), rc.timeline.totalFrames - frames) : 0
   const t0 = performance.now()
   try {

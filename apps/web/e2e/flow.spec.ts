@@ -36,9 +36,9 @@ test('grava os trechos, monta e exporta um MP4', async ({ page }) => {
   })
   expect(info.width).toBe(720)
   expect(info.height).toBe(1280)
-  // abertura 2,5 + ~14,5 de falas + encerramento 3
-  expect(info.duration).toBeGreaterThan(17)
-  expect(info.duration).toBeLessThan(23)
+  // abertura 2,5 + ~14,5 de falas + vinheta 4 + encerramento 3
+  expect(info.duration).toBeGreaterThan(21)
+  expect(info.duration).toBeLessThan(27)
 
   // Retomada: recarrega a página no meio da exportação (como o iOS descartando a aba).
   await page.getByRole('button', { name: 'Exportar de novo' }).click()

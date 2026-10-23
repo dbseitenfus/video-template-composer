@@ -8,6 +8,7 @@ describe('templates', () => {
       expect(template.slots.length).toBeGreaterThan(0)
       if (template.logo) expect(assets[template.logo.asset]).toBeTruthy()
       if (template.music) expect(assets[template.music.asset]).toBeTruthy()
+      for (const clip of template.clips) expect(assets[clip.asset]).toBeTruthy()
     }
   })
 

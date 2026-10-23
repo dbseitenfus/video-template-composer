@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, markRaw, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
-import { buildTimeline, gainAt, locate, musicGainKeyframes, renderFrame, type SizedImage } from '@takeslot/engine'
+import { buildTimeline, clipKey, gainAt, locate, musicGainKeyframes, renderFrame, videoKey, type Located, type SizedImage } from '@takeslot/engine'
 import type { TemplateEntry } from '@takeslot/templates'
 import { templateAssets } from '@takeslot/schema'
 import { readFile } from '../lib/opfs'
@@ -28,6 +28,7 @@ const timeline = computed(() => buildTimeline(template.value, props.takeDuration
 const musicCurve = computed(() => musicGainKeyframes(template.value, timeline.value))
 
 // Objetos de mídia ficam fora da reatividade.
+/** Um elemento de vídeo por take (id do slot) e por clipe fixo (`clip:<id>`). */
 const videos = shallowRef<Record<string, HTMLVideoElement>>({})
 const images: Record<string, SizedImage> = {}
 const objectUrls: string[] = []
@@ -37,7 +38,7 @@ let musicNodes: { src: AudioBufferSourceNode; gain: GainNode } | null = null
 let raf = 0
 let clockStart = 0
 let clockOffset = 0
-let activeSlot: string | null = null
+let activeKey: string | null = null
 
 /** Resolução do canvas do preview: proporção do template, lado maior ~720 px. */
 const size = computed(() => {
@@ -46,28 +47,36 @@ const size = computed(() => {
   return { width: Math.round(width * scale), height: Math.round(height * scale) }
 })
 
+async function createVideo(src: string, volume: number): Promise<HTMLVideoElement> {
+  const v = document.createElement('video')
+  v.src = src
+  v.playsInline = true
+  v.preload = 'auto'
+  v.volume = volume
+  v.muted = volume === 0
+  await new Promise<void>((resolve) => {
+    v.addEventListener('loadeddata', () => resolve(), { once: true })
+    v.addEventListener('error', () => resolve(), { once: true })
+    v.load()
+  })
+  return markRaw(v)
+}
+
 async function load() {
   loading.value = true
   const vids: Record<string, HTMLVideoElement> = {}
-  await Promise.all(
-    Object.entries(props.takePaths).map(async ([slotId, path]) => {
+  await Promise.all([
+    ...Object.entries(props.takePaths).map(async ([slotId, path]) => {
       const file = await readFile(path)
       if (!file) return
       const url = URL.createObjectURL(file)
       objectUrls.push(url)
-      const v = document.createElement('video')
-      v.src = url
-      v.playsInline = true
-      v.preload = 'auto'
-      v.muted = false
-      await new Promise<void>((resolve) => {
-        v.addEventListener('loadeddata', () => resolve(), { once: true })
-        v.addEventListener('error', () => resolve(), { once: true })
-        v.load()
-      })
-      vids[slotId] = markRaw(v)
+      vids[slotId] = await createVideo(url, 1)
     }),
-  )
+    ...template.value.clips.map(async (clip) => {
+      vids[clipKey(clip.id)] = await createVideo(props.entry.assets[clip.asset]!, clip.volume)
+    }),
+  ])
   videos.value = vids
 
   const { images: imageNames } = templateAssets(template.value)
@@ -91,28 +100,32 @@ function draw() {
   const ctx = canvas.value?.getContext('2d')
   if (!ctx) return
   const t = time.value
-  const located = locate(timeline.value, t)
-  let frame = null
-  if (located?.segment.kind === 'slot') {
-    const v = videos.value[located.segment.slot.id]
-    if (v && v.readyState >= 2) frame = { image: v, width: v.videoWidth, height: v.videoHeight }
-  }
+  const v = activeVideo(locate(timeline.value, t))?.video
+  const frame = v && v.readyState >= 2 ? { image: v, width: v.videoWidth, height: v.videoHeight } : null
   renderFrame(ctx, template.value, t, { timeline: timeline.value, frame, images })
 }
 
-/** Mantém o vídeo do slot ativo tocando no tempo certo; o relógio do preview é o mestre. */
+/** Vídeo do segmento ativo (take ou clipe) e o tempo correspondente dentro do arquivo. */
+function activeVideo(located: Located | null): { key: string; video: HTMLVideoElement | undefined; time: number } | null {
+  const segment = located?.segment
+  if (!located || !segment || (segment.kind !== 'slot' && segment.kind !== 'clip')) return null
+  const key = videoKey(segment)
+  const offset = segment.kind === 'clip' ? segment.clip.trimStart : 0
+  return { key, video: videos.value[key], time: located.local + offset }
+}
+
+/** Mantém o vídeo do segmento ativo tocando no tempo certo; o relógio do preview é o mestre. */
 function syncVideos(t: number, seek: boolean) {
-  const located = locate(timeline.value, t)
-  const slotId = located?.segment.kind === 'slot' ? located.segment.slot.id : null
-  if (slotId !== activeSlot) {
-    if (activeSlot) videos.value[activeSlot]?.pause()
-    activeSlot = slotId
+  const active = activeVideo(locate(timeline.value, t))
+  const key = active?.key ?? null
+  if (key !== activeKey) {
+    if (activeKey) videos.value[activeKey]?.pause()
+    activeKey = key
     seek = true
   }
-  if (!slotId || !located) return
-  const v = videos.value[slotId]
-  if (!v) return
-  if (seek || Math.abs(v.currentTime - located.local) > 0.25) v.currentTime = located.local
+  const v = active?.video
+  if (!active || !v) return
+  if (seek || Math.abs(v.currentTime - active.time) > 0.25) v.currentTime = active.time
   if (playing.value && v.paused) void v.play().catch(() => {})
   if (!playing.value && !v.paused) v.pause()
 }
@@ -184,8 +197,7 @@ function seek(t: number) {
   if (wasPlaying) pause()
   time.value = Math.max(0, Math.min(t, timeline.value.duration))
   syncVideos(time.value, true)
-  const located = locate(timeline.value, time.value)
-  const v = located?.segment.kind === 'slot' ? videos.value[located.segment.slot.id] : undefined
+  const v = activeVideo(locate(timeline.value, time.value))?.video
   if (v) v.addEventListener('seeked', draw, { once: true })
   draw()
   if (wasPlaying) void play()
@@ -205,7 +217,7 @@ function cleanup() {
   }
   videos.value = {}
   objectUrls.splice(0).forEach((u) => URL.revokeObjectURL(u))
-  activeSlot = null
+  activeKey = null
 }
 
 onMounted(load)
@@ -222,7 +234,7 @@ defineExpose({ pause })
   <div class="preview">
     <div class="stage" :style="{ aspectRatio: `${size.width} / ${size.height}`, width: `min(100%, calc(65vh * ${size.width / size.height}))` }">
       <canvas ref="canvas" :width="size.width" :height="size.height" @click="playing ? pause() : play()" />
-      <div v-if="loading" class="overlay">Carregando takes…</div>
+      <div v-if="loading" class="overlay">Carregando vídeos…</div>
       <button v-else-if="!playing" class="overlay play" aria-label="Reproduzir" @click="play">▶</button>
     </div>
     <div class="controls">

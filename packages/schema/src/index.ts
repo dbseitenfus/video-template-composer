@@ -97,6 +97,30 @@ export const SlotSchema = z
   })
   .refine((s) => s.minDuration < s.maxDuration, { message: 'minDuration deve ser menor que maxDuration' })
 
+/**
+ * Vídeo fixo do template (vinheta, trecho institucional) que entra entre os trechos gravados.
+ * Precisa ser MP4 H.264/AAC para decodificar em todos os navegadores-alvo.
+ */
+export const ClipSchema = z.object({
+  id: z.string().regex(/^[a-z0-9-]+$/, 'id do clipe deve ter só letras minúsculas, números e hífen'),
+  label: z.string().min(1),
+  /** Nome do arquivo em `assets` do pacote de templates. */
+  asset: z.string().min(1),
+  /** Onde o clipe entra: `intro` (logo após a abertura) ou o id do slot que vem antes dele. */
+  after: z.string().min(1),
+  /** Ponto de início dentro do arquivo, em segundos. */
+  trimStart: seconds.default(0),
+  /** Duração usada do clipe, em segundos (declarada para a linha do tempo não depender de ler o arquivo). */
+  duration: z.number().positive().max(120),
+  fit: z.enum(['cover', 'contain']).default('cover'),
+  background: ColorSchema.default('#000000'),
+  /** Volume do áudio do clipe (0 = mudo). */
+  volume: unit.default(1),
+  /** Abaixa a trilha enquanto o clipe toca, como numa fala. */
+  duckMusic: z.boolean().default(true),
+  layers: z.array(LayerSchema).default([]),
+})
+
 export const LogoSchema = z.object({
   asset: z.string().min(1),
   position: z.enum(['top-left', 'top-right', 'bottom-left', 'bottom-right']).default('top-right'),
@@ -152,6 +176,7 @@ export const TemplateSchema = z
       .default([1080, 720]),
     intro: CardSchema.optional(),
     slots: z.array(SlotSchema).min(1),
+    clips: z.array(ClipSchema).default([]),
     outro: CardSchema.optional(),
     logo: LogoSchema.optional(),
     music: MusicSchema.optional(),
@@ -166,6 +191,15 @@ export const TemplateSchema = z
       }
       ids.add(slot.id)
     })
+    t.clips.forEach((clip, i) => {
+      if (ids.has(clip.id)) {
+        ctx.addIssue({ code: 'custom', path: ['clips', i, 'id'], message: `id repetido: ${clip.id}` })
+      }
+      ids.add(clip.id)
+      if (clip.after !== 'intro' && !t.slots.some((s) => s.id === clip.after)) {
+        ctx.addIssue({ code: 'custom', path: ['clips', i, 'after'], message: `"after" deve ser "intro" ou o id de um slot: ${clip.after}` })
+      }
+    })
   })
 
 export type Color = z.infer<typeof ColorSchema>
@@ -176,6 +210,7 @@ export type Layer = z.infer<typeof LayerSchema>
 export type Background = z.infer<typeof BackgroundSchema>
 export type Card = z.infer<typeof CardSchema>
 export type Slot = z.infer<typeof SlotSchema>
+export type Clip = z.infer<typeof ClipSchema>
 export type Logo = z.infer<typeof LogoSchema>
 export type Music = z.infer<typeof MusicSchema>
 export type Transition = z.infer<typeof TransitionSchema>
@@ -192,8 +227,8 @@ export function safeParseTemplate(data: unknown) {
   return TemplateSchema.safeParse(data)
 }
 
-/** Lista os assets referenciados pelo template (logo, imagens e trilha). */
-export function templateAssets(template: Template): { images: string[]; audio: string[] } {
+/** Lista os assets referenciados pelo template (logo, imagens, trilha e clipes). */
+export function templateAssets(template: Template): { images: string[]; audio: string[]; videos: string[] } {
   const images = new Set<string>()
   const collect = (layers: Layer[]) => {
     for (const layer of layers) if (layer.type === 'image') images.add(layer.asset)
@@ -201,8 +236,13 @@ export function templateAssets(template: Template): { images: string[]; audio: s
   if (template.intro) collect(template.intro.layers)
   if (template.outro) collect(template.outro.layers)
   for (const slot of template.slots) collect(slot.layers)
+  for (const clip of template.clips) collect(clip.layers)
   if (template.logo) images.add(template.logo.asset)
-  return { images: [...images], audio: template.music ? [template.music.asset] : [] }
+  return {
+    images: [...images],
+    audio: template.music ? [template.music.asset] : [],
+    videos: [...new Set(template.clips.map((c) => c.asset))],
+  }
 }
 
 /** Dimensões de saída para uma resolução (lado menor), sempre pares para o H.264. */
