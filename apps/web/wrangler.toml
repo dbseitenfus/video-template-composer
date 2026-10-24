@@ -7,8 +7,8 @@ compatibility_date = "2026-09-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "gravai"
-# Substitua pelo id mostrado por `npx wrangler d1 create gravai`.
-database_id = "00000000-0000-0000-0000-000000000000"
+# Criado com `npx wrangler d1 create gravai`.
+database_id = "dd6ab184-452c-4228-b160-df0a8cc944f3"
 migrations_dir = "migrations"
 
 [[r2_buckets]]
