@@ -55,6 +55,8 @@ export interface ExportJob {
   /** PCM mixado na thread principal; `null` gera vídeo sem áudio. */
   audio: MixedAudio | null
   chunkSeconds?: number
+  /** Texto fixo no canto inferior direito do vídeo (ex.: o endereço do app). */
+  watermark?: string
   videoBitrate?: number
 }
 
@@ -200,6 +202,7 @@ interface RenderContext {
   canvas: OffscreenCanvas
   images: RenderSources['images']
   reader: VideoReader
+  watermark?: string
 }
 
 async function drawFrameAt(rc: RenderContext, n: number): Promise<void> {
@@ -217,7 +220,7 @@ async function drawFrameAt(rc: RenderContext, n: number): Promise<void> {
       frame = { image: sample.toCanvasImageSource(), width: sample.squarePixelWidth, height: sample.squarePixelHeight, rotation: hit.rotation }
     }
   }
-  renderFrame(rc.ctx as Ctx2D, rc.template, t, { timeline: rc.timeline, frame, images: rc.images })
+  renderFrame(rc.ctx as Ctx2D, rc.template, t, { timeline: rc.timeline, frame, images: rc.images, watermark: rc.watermark })
 }
 
 function createRenderContext(job: ExportJob, storage: ExportStorage) {
@@ -235,7 +238,7 @@ function createRenderContext(job: ExportJob, storage: ExportStorage) {
     const path = job.takePaths[key]
     return path ? storage.read(path) : null
   }
-  const rc: RenderContext = { template, timeline, ctx, canvas, images, reader: new VideoReader(resolve) }
+  const rc: RenderContext = { template, timeline, ctx, canvas, images, reader: new VideoReader(resolve), watermark: job.watermark }
   return { rc, width, height }
 }
 
@@ -435,6 +438,7 @@ function fingerprint(job: ExportJob, chunks: ExportChunk[]): string {
     clips: job.template.clips.map((c) => [c.id, c.asset, c.trimStart, c.duration, c.after]),
     chunks: chunks.map((c) => [c.startFrame, c.endFrame]),
     audio: job.audio ? job.audio.channels[0]?.length : 0,
+    watermark: job.watermark ?? null,
   })
 }
 

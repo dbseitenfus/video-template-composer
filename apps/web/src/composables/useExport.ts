@@ -7,6 +7,7 @@ import { readFile } from '../lib/opfs'
 import { reportError } from '../lib/telemetry'
 import { useExportStore } from '../stores/export'
 import { useProjectStore } from '../stores/project'
+import { site } from '../site'
 
 /**
  * Id determinístico: mesmo template + mesmos takes = mesmo trabalho, o que permite retomar.
@@ -71,6 +72,7 @@ export function useExport() {
       takePaths,
       clipFiles,
       resolution,
+      watermark: site.watermark,
       images: bitmaps,
       audio,
     }

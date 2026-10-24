@@ -4,6 +4,8 @@
  */
 export const site = {
   brand: 'gravaí',
+  /** Endereço gravado no canto inferior direito de todo vídeo exportado (e no preview). */
+  watermark: 'gravai.pages.dev',
   eyebrow: 'Segundo turno',
   headline: 'Grave um vídeo com seu rosto para o segundo turno',
   subheadline:

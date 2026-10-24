@@ -18,6 +18,7 @@ import type { TemplateEntry } from '@takeslot/templates'
 import { templateAssets } from '@takeslot/schema'
 import { readFile } from '../lib/opfs'
 import { formatDuration } from '../lib/format'
+import { site } from '../site'
 
 /*
  * Preview: o componente só controla o relógio e o canvas; quem desenha é a mesma
@@ -204,7 +205,7 @@ function draw() {
   const v = activeVideo(located)?.video
   let frame: FrameSource | null = v && v.readyState >= 2 ? { image: v, width: v.videoWidth, height: v.videoHeight } : null
   if (!frame && props.placeholders && located?.segment.kind === 'slot') frame = placeholder(located.segment.slot.label)
-  renderFrame(ctx, template.value, t, { timeline: timeline.value, frame, images })
+  renderFrame(ctx, template.value, t, { timeline: timeline.value, frame, images, watermark: site.watermark })
 }
 
 const fileOffset = (segment: VideoSegment) => (segment.kind === 'clip' ? segment.clip.trimStart : 0)

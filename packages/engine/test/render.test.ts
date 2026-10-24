@@ -70,6 +70,29 @@ describe('renderFrame', () => {
     expect(calls.find((c) => c.op === 'fillText')?.args[0]).toBe('Vinheta')
   })
 
+  it('desenha a marca de URL no canto inferior direito, também durante o escurecimento', () => {
+    const { ctx, calls } = fakeCtx()
+    renderFrame(ctx, template, 0, { timeline, images: {}, watermark: 'gravai.pages.dev' })
+    const markIndex = calls.findIndex((c) => c.op === 'fillText' && c.args[0] === 'gravai.pages.dev')
+    const fadeIndex = calls.map((c) => c.op).lastIndexOf('fillRect')
+    expect(markIndex).toBeGreaterThan(fadeIndex)
+    const mark = calls[markIndex]!
+    expect(mark.args[1]).toBeLessThan(108)
+    expect(mark.args[2]).toBeGreaterThan(192 * 0.9)
+  })
+
+  it('sobe a marca de URL quando há logo no canto inferior direito', () => {
+    const t = makeTemplate({ logo: { asset: 'logo.svg', position: 'bottom-right', width: 0.3 } })
+    const tl = buildTimeline(t, { a: 4, b: 3 })
+    const logo = { image: {} as CanvasImageSource, width: 100, height: 50 }
+    const { ctx, calls } = fakeCtx()
+    renderFrame(ctx, t, 3, { timeline: tl, images: { 'logo.svg': logo }, frame: null, watermark: 'gravai.pages.dev' })
+    const drawLogo = calls.find((c) => c.op === 'drawImage' && c.args[0] === logo.image)!
+    const logoTop = drawLogo.args[2] as number
+    const mark = calls.filter((c) => c.op === 'fillText').pop()!
+    expect(mark.args[2]).toBeLessThan(logoTop)
+  })
+
   it('é determinística: mesmas entradas, mesmas chamadas', () => {
     const a = fakeCtx()
     const b = fakeCtx()

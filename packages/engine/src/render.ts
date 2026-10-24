@@ -27,6 +27,8 @@ export interface RenderSources {
   frame?: FrameSource | null
   /** Imagens do template já decodificadas, por nome do asset. */
   images: Record<string, SizedImage | undefined>
+  /** Texto fixo no canto inferior direito de todos os quadros (ex.: o endereço do app). */
+  watermark?: string
 }
 
 /**
@@ -62,8 +64,9 @@ export function renderFrame(ctx: Ctx2D, template: Template, t: number, sources: 
   const vars = { 'template.name': template.name, 'slot.label': label }
   for (const layer of segment.layers) drawLayer(ctx, layer, local, segment.duration, W, H, sources.images, vars)
 
+  let logoRect: Rect | null = null
   if (template.logo && (template.logo.showOn === 'all' || segment.kind === 'slot')) {
-    drawLogo(ctx, template.logo, sources.images[template.logo.asset], W, H)
+    logoRect = drawLogo(ctx, template.logo, sources.images[template.logo.asset], W, H)
   }
 
   const fade = transitionOpacity(template, segment, local)
@@ -72,6 +75,30 @@ export function renderFrame(ctx: Ctx2D, template: Template, t: number, sources: 
     ctx.fillStyle = '#000000'
     ctx.fillRect(0, 0, W, H)
   }
+  // Depois do escurecimento das transições: a marca fica visível o vídeo inteiro.
+  if (sources.watermark) drawWatermark(ctx, sources.watermark, W, H, template.logo?.position === 'bottom-right' ? logoRect : null)
+  ctx.restore()
+}
+
+/**
+ * Texto branco no canto inferior direito. Se houver logo nesse canto,
+ * fica logo acima dele em vez de sobrepor.
+ */
+function drawWatermark(ctx: Ctx2D, text: string, W: number, H: number, logo: Rect | null) {
+  const m = Math.min(W, H)
+  const size = Math.max(10, Math.round(m * 0.03))
+  const margin = m * 0.035
+  ctx.save()
+  ctx.globalAlpha = 0.85
+  ctx.font = `600 ${size}px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`
+  ctx.textAlign = 'right'
+  ctx.textBaseline = 'alphabetic'
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.6)'
+  ctx.shadowBlur = size * 0.35
+  ctx.shadowOffsetY = size * 0.06
+  ctx.fillStyle = '#ffffff'
+  const bottom = logo ? logo.y - size * 0.5 : H - margin
+  ctx.fillText(text, W - margin, bottom)
   ctx.restore()
 }
 
@@ -209,8 +236,8 @@ function drawImageLayer(ctx: Ctx2D, layer: ImageLayer, img: SizedImage | undefin
   ctx.drawImage(img.image, left, top, w, h)
 }
 
-function drawLogo(ctx: Ctx2D, logo: Logo, img: SizedImage | undefined, W: number, H: number) {
-  if (!img || img.width === 0) return
+function drawLogo(ctx: Ctx2D, logo: Logo, img: SizedImage | undefined, W: number, H: number): Rect | null {
+  if (!img || img.width === 0) return null
   const w = logo.width * W
   const h = (w * img.height) / img.width
   const m = logo.margin * Math.min(W, H)
@@ -220,6 +247,7 @@ function drawLogo(ctx: Ctx2D, logo: Logo, img: SizedImage | undefined, W: number
   ctx.globalAlpha = logo.opacity
   ctx.drawImage(img.image, x, y, w, h)
   ctx.restore()
+  return { x, y, width: w, height: h }
 }
 
 function drawBackground(ctx: Ctx2D, bg: Background, W: number, H: number) {
