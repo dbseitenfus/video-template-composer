@@ -4,6 +4,9 @@ import { ADMIN_TOKEN } from '../playwright.admin.config'
 const sequence = (page: Page) => page.getByTestId('sequence').locator(':scope > li')
 
 async function recordSlot(page: Page, seconds: number) {
+  // Trechos que vêm depois de um vídeo pronto abrem mostrando esse vídeo antes de gravar.
+  const skip = page.getByTestId('clip-part-done')
+  await skip.waitFor({ state: 'visible', timeout: 2000 }).then(() => skip.click(), () => {})
   const button = page.getByTestId('record-button')
   await expect(button).toBeEnabled({ timeout: 15_000 })
   await button.click()
