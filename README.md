@@ -70,7 +70,7 @@ O benchmark fica exposto na rede local, mas câmera e armazenamento local só fu
 **6. Deploy:** veja "Produção (Cloudflare Pages)" na seção "Admin de templates". Depois de configurado uma vez, cada atualização é:
 
 ```bash
-npm run deploy -w @takeslot/web
+npm run deploy
 ```
 
 **Problemas comuns**

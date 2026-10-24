@@ -11,6 +11,7 @@
     "dev": "npm run dev -w @takeslot/web",
     "dev:api": "npm run dev:api -w @takeslot/web",
     "build": "npm run build -w @takeslot/web",
+    "deploy": "npm run deploy -w @takeslot/web",
     "bench": "npm run dev -w @takeslot/bench",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "vitest run",
