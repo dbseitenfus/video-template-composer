@@ -17,7 +17,7 @@ export const site = {
     { title: 'Revise', text: 'Assista e grave de novo o que não gostou, quantas vezes quiser.' },
     { title: 'Compartilhe', text: 'O app monta o vídeo e você manda direto no WhatsApp ou nas redes.' },
   ],
-  privacy: 'Seus vídeos ficam no seu celular. Nada é enviado para servidores.',
+  privacy: 'Seus vídeos ficam no seu celular: nada da gravação é enviado. Só contamos o uso de forma anônima, sem cookies.',
   /** Aviso de independência: curto no topo, completo no rodapé. */
   disclaimer: {
     short: 'Iniciativa independente, sem vínculo com a campanha oficial.',

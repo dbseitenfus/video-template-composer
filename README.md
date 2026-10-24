@@ -351,6 +351,12 @@ npm run deploy                                       # build + migrações remot
 
 O app fica em `https://gravai.pages.dev` e o admin em `/admin`. Para atualizar depois, basta `npm run deploy`.
 
+**Contagem de uso (analytics)**
+
+O app conta, de forma anônima, as etapas do funil: visita (uma por sessão), modelo escolhido, trecho gravado, exportação iniciada, vídeo pronto, falha na exportação e vídeo compartilhado ou baixado. Cada evento leva só a etapa, o id do modelo e o tipo de aparelho (iPhone, Android, computador). A rota `POST /api/events` soma contadores por dia (horário de Brasília) na tabela `usage_daily` do D1, sem IP, sem cookies e sem nada dos vídeos. Navegadores com "Não rastrear" ou Global Privacy Control ativo não são contados. Os números ficam no admin, em **Uso** (`/admin/uso`).
+
+Para ver também o tráfego (origem das visitas, países, páginas), ative o Cloudflare Web Analytics no painel: Workers & Pages → gravai → Metrics → Web Analytics. Ele também não usa cookies.
+
 **Importar vídeos prontos em lote** (um modelo por vídeo)
 
 `apps/web/scripts/import-videos.mjs` cria um modelo para cada vídeo de um manifesto: um trecho curto gravado pela pessoa ("Seu recado"), o vídeo inteiro e um encerramento com o endereço para compartilhar e o crédito do vídeo. A capa de cada modelo na página inicial é a imagem indicada no manifesto. O manifesto dos vídeos da campanha está em `apps/web/scripts/campanha/manifest.json`.

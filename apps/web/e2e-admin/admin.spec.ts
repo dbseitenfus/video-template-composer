@@ -83,6 +83,19 @@ test('admin reordena vídeos pré-gravados e trechos, publica e o app usa a nova
   // abertura 2,5 + vinheta 4 + ~18 de falas + encerramento 3
   expect(duration).toBeGreaterThan(25)
   expect(duration).toBeLessThan(31)
+
+  // Contagem de uso anônima registrou o funil
+  await page.getByRole('button', { name: 'Baixar MP4' }).click()
+  await expect
+    .poll(async () => {
+      const usage = await page.evaluate(async (token) => (await fetch('/api/admin/usage?days=1', { headers: { authorization: `Bearer ${token}` } })).json(), ADMIN_TOKEN)
+      const sum: Record<string, number> = {}
+      for (const r of usage.rows) if (r.templateId === 'depoimento-vertical' || r.event === 'visit') sum[r.event] = (sum[r.event] ?? 0) + r.count
+      return sum
+    })
+    .toMatchObject({ visit: expect.any(Number), template_selected: 1, take_recorded: 4, export_started: 1, export_done: 1, shared: 1 })
+  await page.goto('/admin/uso')
+  await expect(page.getByTestId('usage-export_done')).toContainText('1')
   if (process.env.SHOT_DIR) {
     await page.evaluate(async () => {
       const v = document.querySelector<HTMLVideoElement>('video.result')!

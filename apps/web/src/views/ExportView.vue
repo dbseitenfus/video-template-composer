@@ -10,6 +10,7 @@ import { useWakeLock } from '../composables/useWakeLock'
 import { useExportStore } from '../stores/export'
 import { useProjectStore } from '../stores/project'
 import { formatBytes, formatDuration } from '../lib/format'
+import { track } from '../lib/analytics'
 
 const router = useRouter()
 const project = useProjectStore()
@@ -80,6 +81,7 @@ async function share() {
   try {
     if (report.value?.caps.shareFiles && navigator.canShare?.({ files: [file] })) {
       await navigator.share({ files: [file], title: entry.value.template.name })
+      track('shared', entry.value.template.id)
       return
     }
     if (report.value?.caps.saveFilePicker) {
@@ -88,9 +90,11 @@ async function share() {
       const w = await handle.createWritable()
       await w.write(file)
       await w.close()
+      track('shared', entry.value.template.id)
       return
     }
     download(file)
+    track('shared', entry.value.template.id)
   } catch (e) {
     if ((e as DOMException).name !== 'AbortError') shareError.value = (e as Error).message
   }
@@ -107,7 +111,9 @@ function download(file: File) {
 
 async function downloadFile() {
   const file = await exporter.resultFile()
-  if (file) download(file)
+  if (!file) return
+  download(file)
+  track('shared', entry.value.template.id)
 }
 
 async function restart() {

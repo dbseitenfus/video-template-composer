@@ -10,6 +10,7 @@ import { useProjectStore } from '../stores/project'
 import { captureThumbnail } from '../lib/media'
 import { formatDuration } from '../lib/format'
 import { reportError } from '../lib/telemetry'
+import { track } from '../lib/analytics'
 
 const route = useRoute()
 const router = useRouter()
@@ -73,6 +74,7 @@ async function stop() {
     const take = await recorder.stop()
     if (take) {
       await project.saveTake({ ...take, slotId: slot.value.id, createdAt: Date.now(), thumbnail })
+      track('take_recorded', template.value.id)
       await wakeLock.release()
       await router.push({ name: 'review' })
     }

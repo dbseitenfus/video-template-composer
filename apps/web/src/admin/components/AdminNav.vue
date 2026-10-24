@@ -14,6 +14,7 @@ function logout() {
     <strong>Admin</strong>
     <RouterLink :to="{ name: 'admin-templates' }">Templates</RouterLink>
     <RouterLink :to="{ name: 'admin-assets' }">Arquivos</RouterLink>
+    <RouterLink :to="{ name: 'admin-usage' }">Uso</RouterLink>
     <RouterLink to="/" target="_blank">Ver app</RouterLink>
     <button class="ghost small" @click="logout">Sair</button>
   </nav>

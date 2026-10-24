@@ -54,6 +54,14 @@ export interface Asset {
   url: string
 }
 
+export interface UsageRow {
+  day: string
+  event: string
+  templateId: string
+  device: string
+  count: number
+}
+
 export function getToken(): string | null {
   try {
     return sessionStorage.getItem(TOKEN_KEY)
@@ -113,4 +121,5 @@ export const api = {
     return request<{ asset: Asset }>('/assets', { method: 'POST', body: file, headers }).then((r) => r.asset)
   },
   deleteAsset: (key: string) => request(`/assets/${encodeURIComponent(key)}`, { method: 'DELETE' }),
+  usage: (days: number) => request<{ since: string; today: string; rows: UsageRow[] }>(`/usage?days=${days}`),
 }

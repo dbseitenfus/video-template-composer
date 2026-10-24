@@ -8,6 +8,7 @@ import { reportError } from '../lib/telemetry'
 import { useExportStore } from '../stores/export'
 import { useProjectStore } from '../stores/project'
 import { site } from '../site'
+import { track } from '../lib/analytics'
 
 /**
  * Id determinístico: mesmo template + mesmos takes = mesmo trabalho, o que permite retomar.
@@ -92,6 +93,7 @@ export function useExport() {
     store.status = 'preparing'
     store.pending = true
     let phase = 'preparing'
+    if (!resume) track('export_started', template.id)
     try {
       const remote = connect()
       let resolution = resume && store.resolution ? store.resolution : preferred
@@ -119,6 +121,7 @@ export function useExport() {
       store.result = result
       store.status = 'done'
       store.pending = false
+      track('export_done', template.id)
     } catch (e) {
       if ((e as Error)?.name === 'AbortError') {
         store.status = 'canceled'
@@ -126,6 +129,7 @@ export function useExport() {
       } else {
         store.status = 'error'
         store.pending = false
+        track('export_failed', template.id)
         store.error = (e as Error)?.message ?? String(e)
         reportError(e, { phase, template: template.id })
       }

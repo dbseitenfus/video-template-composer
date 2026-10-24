@@ -12,6 +12,7 @@ import { useProjectStore } from '../stores/project'
 import { requestPersistence } from '../lib/opfs'
 import { formatDuration } from '../lib/format'
 import { loadCatalog, type CatalogSource } from '../lib/catalog'
+import { track } from '../lib/analytics'
 
 const router = useRouter()
 const project = useProjectStore()
@@ -73,6 +74,7 @@ async function choose(entry: TemplateEntry) {
     if (!confirm(message)) return
   }
   await project.selectTemplate(entry)
+  track('template_selected', entry.template.id)
   void requestPersistence()
   const next = project.nextEmptySlot
   await router.push(next ? { name: 'record', params: { slot: next.id } } : { name: 'review' })

@@ -12,6 +12,7 @@ const router = createRouter({
     { path: '/admin/entrar', name: 'admin-login', component: () => import('../admin/views/AdminLogin.vue'), meta: { admin: true } },
     { path: '/admin', name: 'admin-templates', component: () => import('../admin/views/AdminTemplates.vue'), meta: { admin: true } },
     { path: '/admin/templates/:id', name: 'admin-editor', component: () => import('../admin/views/AdminEditor.vue'), meta: { admin: true } },
+    { path: '/admin/uso', name: 'admin-usage', component: () => import('../admin/views/AdminUsage.vue'), meta: { admin: true } },
     { path: '/admin/arquivos', name: 'admin-assets', component: () => import('../admin/views/AdminAssets.vue'), meta: { admin: true } },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
