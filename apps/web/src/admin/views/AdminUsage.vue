@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { api, type UsageRow } from '../api'
-import { daily, DEVICE_LABELS, EVENT_LABELS, groupBy, rate, totals } from '../usage'
+import { api, type DimRow, type UsageRow } from '../api'
+import { byDim, daily, DEVICE_LABELS, DIM_LABELS, EVENT_LABELS, groupBy, rate, totals } from '../usage'
 import AdminNav from '../components/AdminNav.vue'
 
 const days = ref(7)
 const rows = ref<UsageRow[]>([])
+const dims = ref<DimRow[]>([])
+const dim = ref('region')
 const since = ref('')
 const today = ref('')
 const names = ref<Record<string, string>>({})
@@ -18,6 +20,7 @@ async function load() {
   try {
     const [usage, templates] = await Promise.all([api.usage(days.value), api.listTemplates()])
     rows.value = usage.rows
+    dims.value = usage.dims ?? []
     since.value = usage.since
     today.value = usage.today
     names.value = Object.fromEntries(templates.map((t) => [t.id, t.name]))
@@ -38,6 +41,11 @@ const byTemplate = computed(() =>
     .sort((a, b) => (b.export_done ?? 0) - (a.export_done ?? 0) || (b.template_selected ?? 0) - (a.template_selected ?? 0)),
 )
 const byDevice = computed(() => [...groupBy(rows.value, 'device').entries()].map(([id, c]) => ({ id, name: DEVICE_LABELS[id] ?? id, ...c })))
+
+const dimRows = computed(() => byDim(dims.value, dim.value))
+const dimPeak = computed(() => Math.max(1, ...dimRows.value.map((r) => r.counts.visit ?? 0)))
+const showAllDim = ref(false)
+watch(dim, () => (showAllDim.value = false))
 
 const cards = ['visit', 'template_selected', 'take_recorded', 'export_started', 'export_done', 'shared'] as const
 const shortDay = (day: string) => `${day.slice(8, 10)}/${day.slice(5, 7)}`
@@ -61,7 +69,8 @@ onMounted(load)
       </label>
     </section>
     <p class="muted small">
-      Contagem anônima: só a etapa, o modelo e o tipo de aparelho, somados por dia (horário de Brasília). Sem cookies e sem nada dos vídeos.
+      Contagem anônima, somada por dia (horário de Brasília): etapa, modelo, aparelho e detalhes gerais do público (localização aproximada pelo
+      IP, que não é guardado, origem, navegador...). Cada detalhe é contado separado, sem montar o perfil de ninguém. Sem cookies e sem nada dos vídeos.
       Bloqueadores de anúncio podem impedir parte da contagem.
     </p>
     <p v-if="error" class="error">{{ error }}</p>
@@ -117,6 +126,52 @@ onMounted(load)
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section class="card" data-testid="usage-dims">
+        <h2>Público</h2>
+        <div class="chips" role="tablist">
+          <button
+            v-for="(label, key) in DIM_LABELS"
+            :key="key"
+            type="button"
+            role="tab"
+            class="chip"
+            :aria-selected="dim === key"
+            :class="{ active: dim === key }"
+            @click="dim = key"
+          >
+            {{ label }}
+          </button>
+        </div>
+        <p v-if="dimRows.length === 0" class="muted">Nada registrado para {{ DIM_LABELS[dim]?.toLowerCase() }} no período.</p>
+        <div v-else class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>{{ DIM_LABELS[dim] }}</th><th>Visitas</th><th>Escolheram modelo</th><th>Vídeos prontos</th><th>Conversão</th><th>Falhas</th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="r in showAllDim ? dimRows : dimRows.slice(0, 15)" :key="r.value">
+                <td class="dim-name">
+                  <span class="meter" :style="{ width: `${((r.counts.visit ?? 0) / dimPeak) * 100}%` }" />
+                  <span>{{ r.label }}</span>
+                </td>
+                <td>{{ r.counts.visit ?? 0 }}</td>
+                <td>{{ r.counts.template_selected ?? 0 }}</td>
+                <td>{{ r.counts.export_done ?? 0 }}</td>
+                <td>{{ rate(r.counts.export_done, r.counts.visit) }}</td>
+                <td :class="{ warn: (r.counts.export_failed ?? 0) > 0 }">{{ r.counts.export_failed ?? 0 }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <button v-if="dimRows.length > 15" type="button" class="link" @click="showAllDim = !showAllDim">
+            {{ showAllDim ? 'Mostrar menos' : `Mostrar todos (${dimRows.length})` }}
+          </button>
+        </div>
+        <p class="muted small">
+          Localização vem do IP (boa para país e estado, aproximada para cidade). Para saber de onde as pessoas vêm, use links com
+          <code>?utm_source=instagram&amp;utm_campaign=nome</code>: o WhatsApp e alguns apps não informam a origem.
+        </p>
       </section>
 
       <section class="card">
@@ -250,6 +305,50 @@ td {
   text-align: left;
   padding: 0.45rem 0.5rem;
   border-bottom: 1px solid var(--border);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+.chip {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: inherit;
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.dim-name {
+  position: relative;
+  min-width: 10rem;
+}
+.dim-name span:last-child {
+  position: relative;
+}
+.meter {
+  position: absolute;
+  inset: 0.2rem auto 0.2rem 0;
+  background: var(--surface-2);
+  border-radius: 3px;
+}
+.link {
+  margin-top: 0.5rem;
+  background: none;
+  border: 0;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0;
+}
+code {
+  font-size: 0.8rem;
 }
 th {
   color: var(--muted);

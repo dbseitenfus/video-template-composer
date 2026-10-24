@@ -62,6 +62,13 @@ export interface UsageRow {
   count: number
 }
 
+export interface DimRow {
+  dim: string
+  value: string
+  event: string
+  count: number
+}
+
 export function getToken(): string | null {
   try {
     return sessionStorage.getItem(TOKEN_KEY)
@@ -121,5 +128,5 @@ export const api = {
     return request<{ asset: Asset }>('/assets', { method: 'POST', body: file, headers }).then((r) => r.asset)
   },
   deleteAsset: (key: string) => request(`/assets/${encodeURIComponent(key)}`, { method: 'DELETE' }),
-  usage: (days: number) => request<{ since: string; today: string; rows: UsageRow[] }>(`/usage?days=${days}`),
+  usage: (days: number) => request<{ since: string; today: string; rows: UsageRow[]; dims?: DimRow[] }>(`/usage?days=${days}`),
 }

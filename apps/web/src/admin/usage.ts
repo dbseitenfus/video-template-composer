@@ -1,4 +1,4 @@
-import type { UsageRow } from './api'
+import type { DimRow, UsageRow } from './api'
 
 /** Agregações do painel de uso (funções puras, testadas). */
 
@@ -54,4 +54,54 @@ export function groupBy(rows: UsageRow[], key: 'templateId' | 'device'): Map<str
 export function rate(part: number | undefined, whole: number | undefined): string {
   if (!whole) return '—'
   return `${Math.round(((part ?? 0) / whole) * 100)}%`
+}
+
+/** Dimensões do público, na ordem em que aparecem no painel. */
+export const DIM_LABELS: Record<string, string> = {
+  country: 'País',
+  region: 'Estado',
+  city: 'Cidade',
+  isp: 'Operadora / provedor',
+  source: 'Origem',
+  medium: 'Meio (utm_medium)',
+  campaign: 'Campanha (utm_campaign)',
+  browser: 'Navegador',
+  os: 'Sistema',
+  display: 'App ou navegador',
+  screen: 'Largura da tela',
+  lang: 'Idioma',
+  returning: 'Visita nova ou recorrente',
+  connection: 'Conexão',
+  hour: 'Horário (Brasília)',
+}
+
+let countryNames: Intl.DisplayNames | null = null
+
+export function dimValueLabel(dim: string, value: string): string {
+  if (dim === 'country') {
+    try {
+      countryNames ??= new Intl.DisplayNames(['pt-BR'], { type: 'region' })
+      return countryNames.of(value) ?? value
+    } catch {
+      return value
+    }
+  }
+  if (dim === 'returning') return value === 'nova' ? 'Primeira visita' : 'Já tinha vindo'
+  if (dim === 'source' && value === 'direto') return 'Direto / sem origem'
+  return value
+}
+
+/** Valores de uma dimensão com as contagens por evento, do que mais trouxe visitas para o que menos trouxe. */
+export function byDim(rows: DimRow[], dim: string): { value: string; label: string; counts: Counts }[] {
+  const out = new Map<string, Counts>()
+  for (const r of rows) {
+    if (r.dim !== dim) continue
+    const bucket = out.get(r.value) ?? {}
+    const e = r.event as EventName
+    bucket[e] = (bucket[e] ?? 0) + r.count
+    out.set(r.value, bucket)
+  }
+  const list = [...out.entries()].map(([value, counts]) => ({ value, label: dimValueLabel(dim, value), counts }))
+  if (dim === 'hour') return list.sort((a, b) => a.value.localeCompare(b.value))
+  return list.sort((a, b) => (b.counts.visit ?? 0) - (a.counts.visit ?? 0) || (b.counts.export_done ?? 0) - (a.counts.export_done ?? 0))
 }

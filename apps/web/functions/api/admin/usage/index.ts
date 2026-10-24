@@ -11,5 +11,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ env, request }) => {
   )
     .bind(since)
     .all<{ day: string; event: string; templateId: string; device: string; count: number }>()
-  return json({ since, today: brazilDay(), rows: results })
+  const dims = await env.DB.prepare(
+    `SELECT dim, value, event, SUM(count) AS count FROM usage_dims WHERE day >= ? GROUP BY dim, value, event`,
+  )
+    .bind(since)
+    .all<{ dim: string; value: string; event: string; count: number }>()
+  return json({ since, today: brazilDay(), rows: results, dims: dims.results })
 }

@@ -94,8 +94,13 @@ test('admin reordena vídeos pré-gravados e trechos, publica e o app usa a nova
       return sum
     })
     .toMatchObject({ visit: expect.any(Number), template_selected: 1, take_recorded: 4, export_started: 1, export_done: 1, shared: 1 })
+  const dims = await page.evaluate(async (token) => (await fetch('/api/admin/usage?days=1', { headers: { authorization: `Bearer ${token}` } })).json(), ADMIN_TOKEN)
+  const doneDims = Object.fromEntries(dims.dims.filter((d: { event: string }) => d.event === 'export_done').map((d: { dim: string; value: string }) => [d.dim, d.value]))
+  expect(doneDims).toMatchObject({ browser: 'Chrome', source: 'direto', display: 'Navegador', hour: expect.stringMatching(/^\d\dh$/) })
   await page.goto('/admin/uso')
   await expect(page.getByTestId('usage-export_done')).toContainText('1')
+  await page.getByRole('tab', { name: 'Navegador', exact: true }).click()
+  await expect(page.getByTestId('usage-dims')).toContainText('Chrome')
   if (process.env.SHOT_DIR) {
     await page.evaluate(async () => {
       const v = document.querySelector<HTMLVideoElement>('video.result')!

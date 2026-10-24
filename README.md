@@ -365,6 +365,8 @@ O modelo novo ganha o id `<origem>-pausas` e o nome "<título> (com comentários
 
 O app conta, de forma anônima, as etapas do funil: visita (uma por sessão), modelo escolhido, trecho gravado, exportação iniciada, vídeo pronto, falha na exportação e vídeo compartilhado ou baixado. Cada evento leva só a etapa, o id do modelo e o tipo de aparelho (iPhone, Android, computador). A rota `POST /api/contagem` (nome neutro, para não ser barrada por bloqueadores de anúncio; `/api/events` continua aceita) soma contadores por dia (horário de Brasília) na tabela `usage_daily` do D1, sem IP, sem cookies e sem nada dos vídeos. Os números ficam no admin, em **Uso** (`/admin/uso`).
 
+Junto, a tabela `usage_dims` conta detalhes gerais do público, cada um separado (sem cruzar um com outro, para não formar perfil de ninguém): país, estado, cidade e operadora (deduzidos pelo Cloudflare a partir do IP, que não é guardado), navegador e sistema (com destaque para os navegadores internos do Instagram, Facebook e TikTok), hora do dia, origem (`utm_source`, domínio de quem mandou o link ou o app em que foi aberto), meio e campanha (`utm_medium`, `utm_campaign`), idioma, app instalado ou navegador, largura da tela, tipo de conexão e se é a primeira visita no aparelho. Para medir divulgação, use links como `https://…/?utm_source=whatsapp&utm_campaign=video3`. Trechos gravados não levam esses detalhes (são vários por vídeo); cada evento detalhado gera cerca de 15 gravações no D1.
+
 Para ver também o tráfego (origem das visitas, países, páginas), ative o Cloudflare Web Analytics no painel: Workers & Pages → gravai → Metrics → Web Analytics. Ele também não usa cookies.
 
 **Importar vídeos prontos em lote** (um modelo por vídeo)

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { deviceClass } from '../src/lib/analytics'
-import { daily, groupBy, rate, totals } from '../src/admin/usage'
-import { brazilDay, parseUsage } from '../functions/_lib/usage'
+import { deviceClass, inAppSource, referrerSource, screenBucket } from '../src/lib/analytics'
+import { byDim, daily, groupBy, rate, totals } from '../src/admin/usage'
+import { brazilDay, brazilHour, geoInfo, parseUsage, uaInfo } from '../functions/_lib/usage'
 
 describe('contagem de uso', () => {
   it('classifica o aparelho de forma grosseira', () => {
@@ -17,13 +17,57 @@ describe('contagem de uso', () => {
       event: 'export_done',
       templateId: 'depoimento-vertical',
       device: 'ios',
+      ctx: {},
     })
     expect(parseUsage({ event: 'roubar', templateId: 'x' })).toBeNull()
     expect(parseUsage({ event: 'visit', templateId: '<script>', device: 'tv', extra: 'ignorado' })).toEqual({
       event: 'visit',
       templateId: '',
       device: 'other',
+      ctx: {},
     })
+  })
+
+  it('aceita só detalhes conhecidos e com texto seguro', () => {
+    const ctx = { source: 'Instagram', campaign: 'Vídeo 3', lang: 'pt-BR', screen: '<b>', cpf: '123', display: 'x'.repeat(200) }
+    expect(parseUsage({ event: 'visit', ctx })?.ctx).toEqual({ source: 'instagram', campaign: 'Vídeo 3', lang: 'pt-BR', display: 'x'.repeat(48) })
+  })
+
+  it('descobre a origem pelo referrer ou pelo app', () => {
+    expect(referrerSource('https://l.instagram.com/?u=x', 'gravai.app')).toBe('instagram.com')
+    expect(referrerSource('https://www.google.com.br/', 'gravai.app')).toBe('google')
+    expect(referrerSource('https://gravai.app/gravar/a', 'gravai.app')).toBe('')
+    expect(referrerSource('', 'gravai.app')).toBe('')
+    expect(inAppSource('Mozilla/5.0 (iPhone) Instagram 300.0')).toBe('instagram')
+    expect(screenBucket(390)).toBe('360-413px')
+  })
+
+  it('servidor deduz navegador, sistema e localização aproximada', () => {
+    expect(uaInfo('Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) Mobile Instagram 350.0')).toEqual({ browser: 'Instagram (app)', os: 'iOS 18' })
+    expect(uaInfo('Mozilla/5.0 (Linux; Android 14; SM-A146M) SamsungBrowser/25.0 Chrome/121 Safari/537')).toEqual({ browser: 'Samsung Internet', os: 'Android 14' })
+    expect(uaInfo('Mozilla/5.0 (Windows NT 10.0) Chrome/130 Safari/537')).toEqual({ browser: 'Chrome', os: 'Windows' })
+    expect(geoInfo({ country: 'BR', region: 'Rio Grande do Sul', regionCode: 'RS', city: 'Santa Maria', asOrganization: 'Claro NXT' })).toEqual({
+      country: 'BR',
+      region: 'Rio Grande do Sul',
+      city: 'Santa Maria - RS',
+      isp: 'Claro NXT',
+    })
+    expect(geoInfo({ country: 'PT', region: 'Lisboa' }).region).toBe('Lisboa (PT)')
+    expect(geoInfo(undefined)).toEqual({})
+    expect(brazilHour(new Date('2026-10-24T12:30:00Z'))).toBe('09h')
+  })
+
+  it('agrupa o público por dimensão', () => {
+    const dims = [
+      { dim: 'country', value: 'BR', event: 'visit', count: 8 },
+      { dim: 'country', value: 'PT', event: 'visit', count: 2 },
+      { dim: 'country', value: 'BR', event: 'export_done', count: 3 },
+      { dim: 'source', value: 'direto', event: 'visit', count: 5 },
+    ]
+    expect(byDim(dims, 'country')).toEqual([
+      { value: 'BR', label: 'Brasil', counts: { visit: 8, export_done: 3 } },
+      { value: 'PT', label: 'Portugal', counts: { visit: 2 } },
+    ])
   })
 
   it('usa o dia de Brasília', () => {
