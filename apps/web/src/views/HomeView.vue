@@ -91,6 +91,7 @@ async function choose(entry: TemplateEntry) {
         </svg>
         {{ site.privacy }}
       </p>
+      <p class="disclaimer-short">{{ site.disclaimer.short }} <a href="#aviso">Saiba mais</a></p>
     </section>
 
     <section class="steps-section" aria-labelledby="como-funciona">
@@ -143,6 +144,7 @@ async function choose(entry: TemplateEntry) {
     </template>
 
     <footer class="footer">
+      <p id="aviso" class="disclaimer" role="note">{{ site.disclaimer.full }}</p>
       <span>Feito com</span>
       <BrandMark :size="20" />
       <p v-if="site.footnote" class="muted small">{{ site.footnote }}</p>
@@ -394,6 +396,25 @@ h2 {
 }
 .credit {
   font-size: 0.8rem;
+}
+.disclaimer {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--muted);
+  max-width: 34rem;
+  margin: 0 auto 0.5rem !important;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  scroll-margin-top: 1rem;
+}
+.disclaimer-short {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.disclaimer-short a {
+  color: #ffd2c6;
 }
 .credit a {
   display: inline-flex;

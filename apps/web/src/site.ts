@@ -16,6 +16,11 @@ export const site = {
     { title: 'Compartilhe', text: 'O app monta o vídeo e você manda direto no WhatsApp ou nas redes.' },
   ],
   privacy: 'Seus vídeos ficam no seu celular. Nada é enviado para servidores.',
+  /** Aviso de independência: curto no topo, completo no rodapé. */
+  disclaimer: {
+    short: 'Iniciativa independente, sem vínculo com a campanha oficial.',
+    full: 'O gravaí é uma iniciativa independente e voluntária. Não tem relação com a campanha oficial de Lula, com partidos ou coligações, e não é mantido, financiado nem autorizado por eles.',
+  },
   /** Linha opcional no rodapé (ex.: identificação de quem mantém a página). */
   footnote: '',
   /** Crédito de autoria no rodapé. */
