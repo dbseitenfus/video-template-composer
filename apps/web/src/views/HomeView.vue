@@ -64,6 +64,29 @@ function start() {
   templatesSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
+const shareFeedback = ref<string | null>(null)
+let shareTimer = 0
+
+/** Compartilha o app: menu nativo do aparelho quando existe; senão, copia o link. */
+async function shareApp() {
+  const url = location.origin
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: site.brand, text: site.shareText, url })
+      return
+    }
+    await navigator.clipboard.writeText(`${site.shareText} ${url}`)
+    shareFeedback.value = 'Link copiado!'
+  } catch (e) {
+    // Fechar o menu de compartilhar não é erro.
+    if ((e as Error).name === 'AbortError') return
+    shareFeedback.value = `Copie o link: ${url}`
+  }
+  clearTimeout(shareTimer)
+  shareTimer = window.setTimeout(() => (shareFeedback.value = null), 4000)
+}
+onBeforeUnmount(() => clearTimeout(shareTimer))
+
 async function choose(entry: TemplateEntry) {
   const sameTemplate = project.templateId === entry.template.id
   const sameVersion = sameTemplate && project.entry?.version === entry.version
@@ -94,7 +117,14 @@ async function choose(entry: TemplateEntry) {
           {{ site.cta }}
         </button>
         <button v-if="project.template" class="ghost" @click="router.push({ name: 'review' })">Continuar meu vídeo</button>
+        <button class="ghost share" data-testid="share" @click="shareApp">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.4a3 3 0 0 0 0-1.6l6.7-3.4A3 3 0 1 0 15 7c0 .3 0 .5.1.8L8.4 11.2a3 3 0 1 0 0 3.6l6.7 3.4-.1.8a3 3 0 1 0 3-3Z" />
+          </svg>
+          Compartilhar o app
+        </button>
       </div>
+      <p v-if="shareFeedback" class="share-feedback" role="status">{{ shareFeedback }}</p>
       <p class="privacy">
         <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
           <path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3H9Z" />
@@ -280,6 +310,17 @@ h1 {
 }
 .cta:hover:not(:disabled) {
   background: #c40512;
+}
+.share {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.share-feedback {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--br-green);
 }
 .privacy {
   display: flex;

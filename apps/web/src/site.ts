@@ -11,6 +11,8 @@ export const site = {
   subheadline:
     'É simples: siga os passos abaixo. Em poucos minutos o vídeo fica pronto, com abertura, legendas e trilha, para mandar no WhatsApp e postar nas redes.',
   cta: 'Começar a gravar',
+  /** Texto enviado junto com o link pelo botão de compartilhar. */
+  shareText: 'Grave um vídeo com seu rosto para o segundo turno. É rápido e fica tudo no seu celular:',
   steps: [
     { title: 'Escolha um modelo', text: 'Vertical para Stories e WhatsApp, ou quadrado para o feed.' },
     { title: 'Grave cada trecho', text: 'O roteiro aparece na tela e rola sozinho. É só ler olhando para a câmera.' },
