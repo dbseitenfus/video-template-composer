@@ -62,7 +62,7 @@ onMounted(load)
     </section>
     <p class="muted small">
       Contagem anônima: só a etapa, o modelo e o tipo de aparelho, somados por dia (horário de Brasília). Sem cookies e sem nada dos vídeos.
-      Quem ativa "Não rastrear" no navegador não é contado.
+      Bloqueadores de anúncio podem impedir parte da contagem.
     </p>
     <p v-if="error" class="error">{{ error }}</p>
     <p v-else-if="loading" class="muted">Carregando…</p>

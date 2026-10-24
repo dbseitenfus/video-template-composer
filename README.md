@@ -353,7 +353,7 @@ O app fica em `https://gravai.pages.dev` e o admin em `/admin`. Para atualizar d
 
 **Contagem de uso (analytics)**
 
-O app conta, de forma anônima, as etapas do funil: visita (uma por sessão), modelo escolhido, trecho gravado, exportação iniciada, vídeo pronto, falha na exportação e vídeo compartilhado ou baixado. Cada evento leva só a etapa, o id do modelo e o tipo de aparelho (iPhone, Android, computador). A rota `POST /api/events` soma contadores por dia (horário de Brasília) na tabela `usage_daily` do D1, sem IP, sem cookies e sem nada dos vídeos. Navegadores com "Não rastrear" ou Global Privacy Control ativo não são contados. Os números ficam no admin, em **Uso** (`/admin/uso`).
+O app conta, de forma anônima, as etapas do funil: visita (uma por sessão), modelo escolhido, trecho gravado, exportação iniciada, vídeo pronto, falha na exportação e vídeo compartilhado ou baixado. Cada evento leva só a etapa, o id do modelo e o tipo de aparelho (iPhone, Android, computador). A rota `POST /api/contagem` (nome neutro, para não ser barrada por bloqueadores de anúncio; `/api/events` continua aceita) soma contadores por dia (horário de Brasília) na tabela `usage_daily` do D1, sem IP, sem cookies e sem nada dos vídeos. Os números ficam no admin, em **Uso** (`/admin/uso`).
 
 Para ver também o tráfego (origem das visitas, países, páginas), ative o Cloudflare Web Analytics no painel: Workers & Pages → gravai → Metrics → Web Analytics. Ele também não usa cookies.
 
