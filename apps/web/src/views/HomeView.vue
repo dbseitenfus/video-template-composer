@@ -73,6 +73,7 @@ async function choose(entry: TemplateEntry) {
 </script>
 
 <template>
+  <div class="home-bg">
   <main class="home">
     <section class="hero">
       <BrandMark :size="34" class="hero-brand" />
@@ -162,9 +163,32 @@ async function choose(entry: TemplateEntry) {
       </p>
     </footer>
   </main>
+  </div>
 </template>
 
 <style scoped>
+/*
+ * Paleta da página inicial: azul, verde e amarelo da bandeira com o vermelho como destaque.
+ * Sobrescreve as variáveis globais só aqui; as outras telas mantêm o tema padrão.
+ */
+.home-bg {
+  --br-green: #009c3b;
+  --br-yellow: #ffdf00;
+  --br-blue: #002776;
+  --red: #e30613;
+  --accent: var(--red);
+  --bg: #061633;
+  --surface: #0b2250;
+  --surface-2: #133069;
+  --border: #21407f;
+  --muted: #b3c2e2;
+  min-height: 100dvh;
+  color: var(--text);
+  background:
+    radial-gradient(60rem 40rem at 110% -10%, rgb(227 6 19 / 0.22), transparent 60%),
+    radial-gradient(50rem 40rem at -20% 60%, rgb(0 156 59 / 0.16), transparent 60%),
+    var(--bg);
+}
 .home {
   width: min(760px, 100%);
   margin: 0 auto;
@@ -173,16 +197,29 @@ async function choose(entry: TemplateEntry) {
   gap: 1.75rem;
 }
 .hero {
+  position: relative;
+  overflow: hidden;
   margin: 0 -1rem;
-  padding: 2rem 1.25rem 1.75rem;
+  padding: 2.2rem 1.25rem 1.75rem;
   display: grid;
   gap: 0.9rem;
   justify-items: start;
   background:
-    radial-gradient(120% 90% at 100% 0%, rgb(225 29 46 / 0.45), transparent 60%),
-    radial-gradient(90% 80% at 0% 100%, rgb(255 90 54 / 0.25), transparent 60%),
-    var(--surface);
+    radial-gradient(120% 90% at 100% 0%, rgb(227 6 19 / 0.75), transparent 62%),
+    radial-gradient(90% 70% at 0% 100%, rgb(0 156 59 / 0.45), transparent 60%),
+    linear-gradient(160deg, #0a2a6b, var(--br-blue));
   border-bottom: 1px solid var(--border);
+}
+/* Faixa com as cores do Brasil no topo. */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 6px;
+  background: linear-gradient(90deg, var(--br-green) 0 25%, var(--br-yellow) 25% 50%, #1f5bd8 50% 75%, var(--red) 75%);
+}
+.hero > * {
+  position: relative;
 }
 @media (min-width: 760px) {
   .hero {
@@ -197,10 +234,10 @@ async function choose(entry: TemplateEntry) {
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 0.3rem 0.7rem;
+  padding: 0.3rem 0.75rem;
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.1);
-  color: #ffd2c6;
+  background: var(--br-yellow);
+  color: var(--br-blue);
 }
 h1 {
   font-size: clamp(1.75rem, 7.5vw, 2.7rem);
@@ -213,7 +250,7 @@ h1 {
   margin: 0;
   font-size: 1.05rem;
   line-height: 1.5;
-  color: #e4e2f0;
+  color: #eef2fb;
   max-width: 36rem;
 }
 .hero-actions {
@@ -225,7 +262,13 @@ h1 {
 .cta {
   font-size: 1.05rem;
   padding: 0.95rem 1.6rem;
-  box-shadow: 0 10px 24px rgb(255 90 54 / 0.35);
+  background: var(--red);
+  box-shadow:
+    0 0 0 3px rgb(255 223 0 / 0.9),
+    0 12px 28px rgb(227 6 19 / 0.45);
+}
+.cta:hover:not(:disabled) {
+  background: #c40512;
 }
 .privacy {
   display: flex;
@@ -233,7 +276,7 @@ h1 {
   gap: 0.4rem;
   margin: 0;
   font-size: 0.85rem;
-  color: var(--muted);
+  color: #d5def2;
 }
 h2 {
   font-size: 1.25rem;
@@ -267,9 +310,20 @@ h2 {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--br-green);
   color: #fff;
   font-weight: 800;
+}
+/* Cada passo com uma cor da bandeira, e o último com o vermelho. */
+.steps li:nth-child(2) .num {
+  background: var(--br-yellow);
+  color: var(--br-blue);
+}
+.steps li:nth-child(3) .num {
+  background: #1f5bd8;
+}
+.steps li:nth-child(4) .num {
+  background: var(--red);
 }
 .steps p {
   margin: 0.2rem 0 0;
@@ -303,6 +357,7 @@ h2 {
   padding: 0.9rem;
   background: var(--surface);
   border: 1px solid var(--border);
+  border-top: 3px solid var(--br-yellow);
   border-radius: 16px;
 }
 .body {
@@ -404,7 +459,7 @@ h2 {
   max-width: 34rem;
   margin: 0 auto 0.5rem !important;
   padding: 0.75rem 0.9rem;
-  border: 1px solid var(--border);
+  border: 1px solid rgb(255 223 0 / 0.35);
   border-radius: 10px;
   scroll-margin-top: 1rem;
 }
@@ -413,8 +468,11 @@ h2 {
   font-size: 0.8rem;
   color: var(--muted);
 }
+.disclaimer-short {
+  color: #d5def2;
+}
 .disclaimer-short a {
-  color: #ffd2c6;
+  color: var(--br-yellow);
 }
 .credit a {
   display: inline-flex;
