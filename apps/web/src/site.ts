@@ -5,7 +5,7 @@
 export const site = {
   brand: 'gravaí',
   eyebrow: 'Segundo turno',
-  headline: 'Grave um vídeo com seu rosto para a campanha de Lula',
+  headline: 'Grave um vídeo com seu rosto para o segundo turno',
   subheadline:
     'É simples: siga os passos abaixo. Em poucos minutos o vídeo fica pronto, com abertura, legendas e trilha, para mandar no WhatsApp e postar nas redes.',
   cta: 'Começar a gravar',
