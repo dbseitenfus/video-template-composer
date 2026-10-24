@@ -131,7 +131,7 @@ async function choose(entry: TemplateEntry) {
             <p class="muted">{{ entry.template.description }}</p>
             <ul class="chips">
               <li>{{ formatLabel(entry.template) }}</li>
-              <li>{{ entry.template.slots.length }} trechos para gravar</li>
+              <li>{{ entry.template.slots.length }} {{ entry.template.slots.length === 1 ? "trecho" : "trechos" }} para gravar</li>
               <li>{{ totalRange(entry.template) }}</li>
             </ul>
             <button @click="choose(entry)">
