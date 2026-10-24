@@ -381,7 +381,7 @@ node apps/web/scripts/import-videos.mjs --dry-run
 ADMIN_TOKEN=seu-token node apps/web/scripts/import-videos.mjs --url https://gravai.pages.dev
 ```
 
-Rodar de novo atualiza os modelos (nova versão) em vez de duplicar. Com `--rascunho`, salva sem publicar. Vídeos que não estejam em H.264/AAC ou que passem de 95 MB são apontados no final; esses vão pelo admin, que converte no navegador.
+Rodar de novo atualiza os modelos (nova versão) em vez de duplicar. O roteiro do recado de cada vídeo fica no campo `recado` do manifesto; para publicar só mudanças de texto, sem reenviar os vídeos, use `--atualizar-textos`. Com `--rascunho`, salva sem publicar. Vídeos que não estejam em H.264/AAC ou que passem de 95 MB são apontados no final; esses vão pelo admin, que converte no navegador.
 
 **Custos:** D1 e R2 cabem no plano gratuito no começo (5 GB e 10 GB). O R2 não cobra pela transferência de saída, e isso pesa aqui, porque cada usuário baixa os vídeos pré-gravados.
 

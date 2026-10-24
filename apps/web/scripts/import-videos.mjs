@@ -16,6 +16,8 @@
  *   --dry-run   só confere (e converte, se preciso) os arquivos e mostra o que seria criado;
  *               não envia nada e não precisa de token
  *   --rascunho  salva os modelos sem publicar
+ *   --atualizar-textos  só atualiza os textos (roteiro do recado, nomes) dos modelos já
+ *               publicados, reaproveitando os arquivos que já estão no site: não envia vídeo
  *
  * Vídeos que não estejam em H.264/AAC (ex.: HEVC) são convertidos com o ffmpeg, se estiver
  * instalado, para a subpasta `convertidos/`. Os arquivos originais não são alterados.
@@ -38,6 +40,7 @@ const dir = opt('dir', 'apps/web/scripts/campanha/arquivos')
 const baseUrl = opt('url', 'https://gravai.pages.dev').replace(/\/$/, '')
 const dryRun = flag('dry-run')
 const publish = !flag('rascunho')
+const textsOnly = flag('atualizar-textos')
 const MAX_BYTES = 95 * 1024 * 1024
 const CANVAS = { width: 1080, height: 1920 }
 
@@ -156,7 +159,7 @@ function buildTemplate(item, videoKey, coverKey, info) {
       {
         id: 'recado',
         label: 'Seu recado',
-        script: `Oi! Separei um vídeo que todo mundo precisa ver: "${item.title}".\nAssista até o fim e compartilhe com quem ainda está em dúvida.`,
+        script: item.recado ?? `Oi! Separei um vídeo que todo mundo precisa ver: "${item.title}".\nAssista até o fim e compartilhe com quem ainda está em dúvida.`,
         minDuration: 3,
         maxDuration: 20,
         fit: 'cover',
@@ -195,6 +198,44 @@ function buildTemplate(item, videoKey, coverKey, info) {
 let ok = 0
 const problems = []
 const missingCovers = []
+
+// Modo só-textos: reaproveita vídeo e capa do modelo publicado e troca o resto pelo manifesto.
+if (textsOnly) {
+  const published = new Map(
+    ((await (await fetch(`${baseUrl}/api/templates`)).json()).templates ?? []).map((e) => [e.template.id, e.template]),
+  )
+  for (const [n, item] of manifest.videos.entries()) {
+    const label = `[${n + 1}/${manifest.videos.length}] ${item.title}`
+    try {
+      const current = published.get(item.id)
+      if (!current) throw new Error('modelo ainda não publicado (rode a importação normal)')
+      const clip = current.clips[0]
+      const info = { width: CANVAS.width, height: CANVAS.height, duration: clip.duration }
+      const next = buildTemplate(item, clip.asset, current.thumbnail, info)
+      next.clips[0].fit = clip.fit
+      if (dryRun) {
+        console.log(`${label}: novo roteiro → ${next.slots[0].script.replace(/\n/g, ' ')}`)
+        ok++
+        continue
+      }
+      await api(`/templates/${encodeURIComponent(item.id)}`, { method: 'PUT', body: JSON.stringify({ template: next }), headers: { 'content-type': 'application/json' } })
+      if (publish) {
+        const { version } = await api(`/templates/${encodeURIComponent(item.id)}/publish`, { method: 'POST' })
+        console.log(`${label}: textos atualizados (v${version})`)
+      } else console.log(`${label}: rascunho atualizado`)
+      ok++
+    } catch (e) {
+      problems.push(`${label}: ${e.message}`)
+      console.error(`${label}: ERRO: ${e.message}`)
+    }
+  }
+  console.log(`\n${ok} de ${manifest.videos.length} ${dryRun ? 'conferidos' : 'atualizados'}.`)
+  if (problems.length) {
+    console.log('Pendências:\n' + problems.map((p) => `- ${p}`).join('\n'))
+    process.exitCode = 1
+  }
+  process.exit()
+}
 for (const [n, item] of manifest.videos.entries()) {
   const label = `[${n + 1}/${manifest.videos.length}] ${item.title}`
   const videoPath = join(dir, item.video)

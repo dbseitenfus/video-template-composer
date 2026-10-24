@@ -9,7 +9,8 @@
       "video": "Com_flavio_voce_perde.mp4",
       "cover": "com-flavio-voce-perde.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Com_flavio_voce_perde.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/com-flavio-voce-perde.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/com-flavio-voce-perde.jpg",
+      "recado": "Antes de decidir seu voto, me dá um minuto.\nEsse vídeo faz uma pergunta que eu também me fiz: vale mesmo correr esse risco?"
     },
     {
       "id": "campanha-cortes-bolsonaros",
@@ -17,7 +18,8 @@
       "video": "Cortes_bolsonaros.mp4",
       "cover": "cortes-bolsonaros.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Cortes_bolsonaros.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/cortes-bolsonaros.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/cortes-bolsonaros.jpg",
+      "recado": "Você já ouviu falar no tesouraço?\nEu não tinha noção do tamanho desses cortes até ver esse vídeo."
     },
     {
       "id": "campanha-flavio-contra-bolsa-familia",
@@ -25,7 +27,8 @@
       "video": "Flavio_contra_bolsa_familia.mp4",
       "cover": "flavio-contra-bolsa-familia.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Flavio_contra_bolsa_familia.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/flavio-contra-bolsa-familia.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/flavio-contra-bolsa-familia.jpg",
+      "recado": "Se você ou alguém da sua família depende do Bolsa Família, presta atenção nesse vídeo.\nMudança nem sempre é pra melhor."
     },
     {
       "id": "campanha-flavio-maos-de-tesoura",
@@ -33,7 +36,8 @@
       "video": "flavio_maos_de_tesoura.mp4",
       "cover": "flavio-maos-de-tesoura.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/flavio_maos_de_tesoura.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/flavio-maos-de-tesoura.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/flavio-maos-de-tesoura.jpg",
+      "recado": "Saúde, educação, programa social…\nEsse vídeo mostra até onde a tesoura pode chegar. Vale ver antes de votar."
     },
     {
       "id": "campanha-modelo-do-tesouraco",
@@ -41,7 +45,8 @@
       "video": "Modelo_do_tesouraco.mp4",
       "cover": "modelo-do-tesouraco.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Modelo_do_tesouraco.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/modelo-do-tesouraco.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/modelo-do-tesouraco.jpg",
+      "recado": "Você acompanhou o que aconteceu na Argentina?\nEsse vídeo explica por que essa receita preocupa tanta gente aqui no Brasil."
     },
     {
       "id": "campanha-nao-importa",
@@ -49,7 +54,8 @@
       "video": "Nao_importa.mp4",
       "cover": "nao-importa.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Nao_importa.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/nao-importa.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/nao-importa.jpg",
+      "recado": "Tem coisa nessa história que eu não consigo deixar passar.\nAssiste esse vídeo e tira suas próprias conclusões."
     },
     {
       "id": "campanha-record-de-tesouraco",
@@ -57,7 +63,8 @@
       "video": "Record_de_tesouraco.mp4",
       "cover": "record-de-tesouraco.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Record_de_tesouraco.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/record-de-tesouraco.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/record-de-tesouraco.jpg",
+      "recado": "Esse apelido de mãos de tesoura não veio do nada.\nOlha o que esse vídeo mostra e me diz se não faz sentido."
     },
     {
       "id": "campanha-resultado-do-tesouraco",
@@ -65,7 +72,8 @@
       "video": "Resultado_do_tesouraco.mp4",
       "cover": "resultado-do-tesouraco.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Resultado_do_tesouraco.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/resultado-do-tesouraco.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/resultado-do-tesouraco.jpg",
+      "recado": "Parece piada, mas o assunto é sério:\nquando o corte vem, quem sente é o povo. Vê esse vídeo rapidinho."
     },
     {
       "id": "campanha-tesouraco-250bi",
@@ -73,7 +81,8 @@
       "video": "Tesouraco_250Bi.mp4",
       "cover": "tesouraco-250bi.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Tesouraco_250Bi.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/tesouraco-250bi.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/tesouraco-250bi.jpg",
+      "recado": "É muito bilhão em corte.\nA pergunta que fica é: de onde vai sair esse dinheiro? O vídeo responde."
     },
     {
       "id": "campanha-tesouraco-educacao",
@@ -81,7 +90,8 @@
       "video": "Tesouraco_educacao.mp4",
       "cover": "tesouraco-educacao.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Tesouraco_educacao.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/tesouraco-educacao.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/tesouraco-educacao.jpg",
+      "recado": "Se um professor já mudou a sua vida, assiste esse vídeo até o fim.\nEducação não pode ser a primeira a pagar a conta."
     },
     {
       "id": "campanha-tesouraco-gas-do-povo",
@@ -89,7 +99,8 @@
       "video": "Tesouraco_gas_do_povo.mp4",
       "cover": "tesouraco-gas-do-povo.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Tesouraco_gas_do_povo.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/tesouraco-gas-do-povo.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/tesouraco-gas-do-povo.jpg",
+      "recado": "Botijão de gás pesa no bolso de muita gente.\nEsse vídeo fala de um programa que ajuda quem mais precisa, e do que pode acontecer com ele."
     },
     {
       "id": "campanha-tesouraco-pro-uni",
@@ -97,7 +108,8 @@
       "video": "Tesouraco_pro_uni.mp4",
       "cover": "tesouraco-pro-uni.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Tesouraco_pro_uni.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/tesouraco-pro-uni.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/tesouraco-pro-uni.jpg",
+      "recado": "Eu conheço muita gente que só fez faculdade por causa do ProUni.\nPor isso esse vídeo me preocupa. Manda pra quem está estudando."
     },
     {
       "id": "campanha-quem-e-flavio",
@@ -105,7 +117,8 @@
       "video": "quem-eh-flavio.mp4",
       "cover": "quem-e-flavio.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/quem-eh-flavio.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/quem-e-flavio.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/quem-e-flavio.jpg",
+      "recado": "Muita gente vai votar sem conhecer direito a trajetória do candidato.\nEsse vídeo resume em menos de um minuto."
     },
     {
       "id": "campanha-5-perguntas",
@@ -113,7 +126,8 @@
       "video": "5Perguntas.mp4",
       "cover": "5-perguntas.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/5Perguntas.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/5-perguntas.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/5-perguntas.jpg",
+      "recado": "São cinco perguntas que ainda estão sem resposta.\nAssiste e pensa nelas com calma antes de votar."
     },
     {
       "id": "campanha-bolsomaster",
@@ -121,7 +135,8 @@
       "video": "Bolsomaster.mp4",
       "cover": "bolsomaster.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Bolsomaster.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/bolsomaster.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/bolsomaster.jpg",
+      "recado": "Já ouviu falar do Bolsomaster?\nEu precisei ver duas vezes pra acreditar. Assiste aí."
     },
     {
       "id": "campanha-cade-o-dinheiro",
@@ -129,7 +144,8 @@
       "video": "Cade-o-Dinheiro_.mp4",
       "cover": "cade-o-dinheiro.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Cade-o-Dinheiro_.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/cade-o-dinheiro.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/cade-o-dinheiro.jpg",
+      "recado": "É uma pergunta simples: cadê o dinheiro?\nEsse vídeo mostra por que ela continua sem resposta."
     },
     {
       "id": "campanha-flavio-ligou-5x",
@@ -137,7 +153,8 @@
       "video": "FlavioLigou5X.mp4",
       "cover": "flavio-ligou-5x.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/FlavioLigou5X.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/flavio-ligou-5x.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/flavio-ligou-5x.jpg",
+      "recado": "Pelo menos cinco ligações.\nEsse vídeo mostra o que se sabe sobre essas conversas. Vale a pena ver."
     },
     {
       "id": "campanha-flavio-nao-cumpriu",
@@ -145,7 +162,8 @@
       "video": "Flavio-Nao-cumpriu.mp4",
       "cover": "flavio-nao-cumpriu.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Flavio-Nao-cumpriu.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/flavio-nao-cumpriu.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/flavio-nao-cumpriu.jpg",
+      "recado": "Promessa é fácil de fazer.\nEsse vídeo compara o que foi prometido com o que aconteceu de verdade."
     },
     {
       "id": "campanha-pagina-virada",
@@ -153,7 +171,8 @@
       "video": "paginavirada.mp4",
       "cover": "pagina-virada.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/paginavirada.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/pagina-virada.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/pagina-virada.jpg",
+      "recado": "Tem página da nossa história que a gente não quer reler.\nAssiste esse vídeo comigo."
     },
     {
       "id": "campanha-isso-e-grave",
@@ -161,7 +180,8 @@
       "video": "Issoegrave.mp4",
       "cover": "isso-e-grave.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Issoegrave.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/isso-e-grave.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/isso-e-grave.jpg",
+      "recado": "Eu não costumo mandar vídeo de política, mas esse eu precisava compartilhar.\nÉ grave, e todo mundo devia saber."
     },
     {
       "id": "campanha-pare-e-pense",
@@ -169,7 +189,8 @@
       "video": "pareepense.mp4",
       "cover": "pare-e-pense.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/pareepense.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/pare-e-pense.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/pare-e-pense.jpg",
+      "recado": "Te peço só um minuto.\nAssiste esse vídeo com calma e pensa sobre isso antes de votar."
     },
     {
       "id": "campanha-verdade-sobre-flavio",
@@ -177,7 +198,8 @@
       "video": "VerdadesobreFlavioBolsonaro.mp4",
       "cover": "verdade-sobre-flavio.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/VerdadesobreFlavioBolsonaro.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/verdade-sobre-flavio.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/verdade-sobre-flavio.jpg",
+      "recado": "Tem muita informação circulando por aí.\nEsse vídeo junta o que você precisa saber, em poucos segundos."
     },
     {
       "id": "campanha-caranguejo",
@@ -185,7 +207,8 @@
       "video": "Caranguejo_.mp4",
       "cover": "caranguejo.jpg",
       "videoUrl": "https://materiais.opiordosbolsonaros.com.br/Caranguejo_.mp4",
-      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/caranguejo.jpg"
+      "coverUrl": "https://opiordosbolsonaros.com.br/img/videos/caranguejo.jpg",
+      "recado": "Sabe o caranguejo, que anda pra trás?\nEsse vídeo explica a comparação. Assiste e me diz se não é isso mesmo."
     }
   ]
 }

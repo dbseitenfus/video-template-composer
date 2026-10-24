@@ -131,7 +131,8 @@ const template = {
       ...(first ?? {}),
       id: 'abertura',
       label: 'Abertura',
-      script: `Oi! Vou te mostrar um vídeo que todo mundo precisa ver: "${source.name}".\nNo meio eu paro para comentar.`,
+      // Mesmo início do modelo de origem (roteiro próprio de cada vídeo), avisando das pausas.
+      script: `${first?.script ?? `Separei um vídeo que todo mundo precisa ver: "${source.name}".`}\nNo meio eu paro pra comentar.`,
       minDuration: 3,
       maxDuration: 15,
       fit: 'cover',
