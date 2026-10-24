@@ -150,7 +150,7 @@ function buildTemplate(item, videoKey, coverKey, info) {
     schemaVersion: 1,
     id: item.id,
     name: item.title,
-    description: 'Grave um recado curto e compartilhe este vídeo da campanha.',
+    description: 'Grave seu recado em 20 segundos. Vindo de você, o vídeo chega muito mais longe.',
     ...(coverKey ? { thumbnail: coverKey } : {}),
     canvas: CANVAS,
     fps: 30,
@@ -159,7 +159,7 @@ function buildTemplate(item, videoKey, coverKey, info) {
       {
         id: 'recado',
         label: 'Seu recado',
-        script: item.recado ?? `Oi! Separei um vídeo que todo mundo precisa ver: "${item.title}".\nAssista até o fim e compartilhe com quem ainda está em dúvida.`,
+        script: item.recado ?? `Para tudo e assiste esse vídeo: "${item.title}".\nDepois manda pra quem ainda está em dúvida.`,
         minDuration: 3,
         maxDuration: 20,
         fit: 'cover',
@@ -186,7 +186,7 @@ function buildTemplate(item, videoKey, coverKey, info) {
       // Fundo azul: a marca branca do gravaí (canto inferior direito) continua visível.
       background: { type: 'color', color: '#002776' },
       layers: [
-        { type: 'text', text: 'Veja e compartilhe', x: 0.5, y: 0.42, fontSize: 0.05, fontWeight: 800, color: '#ffffff', shadow: false, animation: 'pop' },
+        { type: 'text', text: 'Não deixa parar em você', x: 0.5, y: 0.42, fontSize: 0.05, fontWeight: 800, color: '#ffffff', shadow: false, animation: 'pop' },
         { type: 'text', text: manifest.shareUrl, x: 0.5, y: 0.49, fontSize: 0.035, fontWeight: 700, color: '#ffdf00', shadow: false, start: 0.3 },
         { type: 'text', text: manifest.credit, x: 0.5, y: 0.85, maxWidth: 0.86, fontSize: 0.018, fontWeight: 500, color: '#c8d3ee', shadow: false, start: 0.3 },
       ],
