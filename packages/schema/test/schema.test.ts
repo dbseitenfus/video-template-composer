@@ -50,7 +50,8 @@ describe('TemplateSchema', () => {
       music: { asset: 'trilha.wav' },
       outro: { duration: 2, background: { type: 'color', color: '#000' }, layers: [{ type: 'image', asset: 'selo.png', x: 0.5, y: 0.5, width: 0.3 }] },
     })
-    expect(templateAssets(t)).toEqual({ images: ['selo.png', 'logo.svg'], audio: ['trilha.wav'], videos: [] })
+    expect(templateAssets(t)).toEqual({ images: ['selo.png', 'logo.svg'], audio: ['trilha.wav'], videos: [], thumbnail: [] })
+    expect(templateAssets(parseTemplate({ ...minimal, thumbnail: 'capa.jpg' })).thumbnail).toEqual(['capa.jpg'])
   })
 
   it('aceita clipes fixos e valida o "after"', () => {

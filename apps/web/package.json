@@ -11,7 +11,8 @@
     "typecheck": "vue-tsc --noEmit && tsc -p functions/tsconfig.json",
     "test:e2e": "playwright test",
     "test:e2e:admin": "playwright test -c playwright.admin.config.ts",
-    "deploy": "vite build && wrangler d1 migrations apply gravai --remote && wrangler pages deploy dist --branch main"
+    "deploy": "vite build && wrangler d1 migrations apply gravai --remote && wrangler pages deploy dist --branch main",
+    "import:videos": "node scripts/import-videos.mjs --manifest scripts/campanha/manifest.json --dir scripts/campanha/arquivos"
   },
   "dependencies": {
     "@takeslot/engine": "0.1.0",

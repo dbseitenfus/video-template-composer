@@ -21,7 +21,7 @@ export const site = {
   /** Aviso de independência: curto no topo, completo no rodapé. */
   disclaimer: {
     short: 'Iniciativa independente, sem vínculo com a campanha oficial.',
-    full: 'O gravaí é uma iniciativa independente e voluntária. Não tem relação com a campanha oficial de Lula, com partidos ou coligações, e não é mantido, financiado nem autorizado por eles.',
+    full: 'O gravaí é uma iniciativa independente e voluntária. Não tem relação com a campanha oficial de Lula, com partidos ou coligações, e não é mantido, financiado nem autorizado por eles. Os vídeos da campanha usados nos modelos são o material público divulgado em opiordosbolsonaros.com.br, com o crédito da coligação no fim de cada vídeo.',
   },
   /** Linha opcional no rodapé (ex.: identificação de quem mantém a página). */
   footnote: '',

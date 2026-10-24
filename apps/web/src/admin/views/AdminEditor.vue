@@ -133,8 +133,8 @@ watch(
     if (!v?.success) return
     previewTimer = window.setTimeout(() => {
       const template = v.data
-      const { images, audio, videos } = templateAssets(template)
-      const assets = Object.fromEntries([...images, ...audio, ...videos].map((k) => [k, `/api/assets/${encodeURIComponent(k)}`]))
+      const { images, audio, videos, thumbnail } = templateAssets(template)
+      const assets = Object.fromEntries([...images, ...audio, ...videos, ...thumbnail].map((k) => [k, `/api/assets/${encodeURIComponent(k)}`]))
       previewDurations.value = Object.fromEntries(template.slots.map((s) => [s.id, placeholderDuration(s)]))
       previewEntry.value = { template, assets }
     }, 500)
@@ -192,6 +192,10 @@ onBeforeRouteLeave(() => !localDirty.value || confirm('Há alterações não sal
             <div class="fields">
               <label class="field wide"><span>Nome</span><input v-model="draft.name" /></label>
               <label class="field wide"><span>Descrição</span><input v-model="draft.description" /></label>
+              <div class="wide row thumb-field">
+                <AssetField v-model="draft.thumbnail" kind="image" label="Capa na página inicial (opcional)" :names="library.names.value" />
+                <button v-if="draft.thumbnail" class="ghost small" type="button" @click="draft.thumbnail = undefined">Usar quadro do vídeo</button>
+              </div>
               <label class="field">
                 <span>Formato</span>
                 <select v-model="aspect">
@@ -348,6 +352,12 @@ h2 {
 .sticky {
   position: sticky;
   top: 1rem;
+}
+.thumb-field {
+  align-items: end;
+}
+.thumb-field > :first-child {
+  flex: 1;
 }
 .json {
   min-height: 320px;

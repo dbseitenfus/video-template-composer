@@ -20,8 +20,8 @@ export interface PublishedTemplate {
 export const assetUrl = (key: string) => `/api/assets/${encodeURIComponent(key)}`
 
 export function withAssetUrls(template: Template, version: number): PublishedTemplate {
-  const { images, audio, videos } = templateAssets(template)
-  return { template, version, assets: Object.fromEntries([...images, ...audio, ...videos].map((k) => [k, assetUrl(k)])) }
+  const { images, audio, videos, thumbnail } = templateAssets(template)
+  return { template, version, assets: Object.fromEntries([...images, ...audio, ...videos, ...thumbnail].map((k) => [k, assetUrl(k)])) }
 }
 
 /** Valida com o mesmo schema do app; devolve os erros com o caminho de cada campo. */
@@ -33,8 +33,8 @@ export function validate(data: unknown): { ok: true; template: Template } | { ok
 
 /** Assets referenciados pelo template que não existem na biblioteca. */
 export async function missingAssets(env: Env, template: Template): Promise<string[]> {
-  const { images, audio, videos } = templateAssets(template)
-  const keys = [...images, ...audio, ...videos]
+  const { images, audio, videos, thumbnail } = templateAssets(template)
+  const keys = [...images, ...audio, ...videos, ...thumbnail]
   if (keys.length === 0) return []
   const { results } = await env.DB.prepare(`SELECT key FROM assets WHERE key IN (${keys.map(() => '?').join(',')})`)
     .bind(...keys)

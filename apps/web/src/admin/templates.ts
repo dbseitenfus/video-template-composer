@@ -124,6 +124,7 @@ export function remapAssets(t: Template, map: Record<string, string>): Template 
     outro: t.outro && { ...t.outro, layers: layers(t.outro.layers) },
     slots: t.slots.map((s) => ({ ...s, layers: layers(s.layers) })),
     clips: t.clips.map((c) => ({ ...c, asset: swap(c.asset), layers: layers(c.layers) })),
+    thumbnail: t.thumbnail && swap(t.thumbnail),
     logo: t.logo && { ...t.logo, asset: swap(t.logo.asset) },
     music: t.music && { ...t.music, asset: swap(t.music.asset) },
   }

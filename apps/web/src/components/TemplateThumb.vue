@@ -11,9 +11,12 @@ import { enqueue, withTimeout } from '../lib/serial'
  * Miniatura real do modelo, desenhada pela mesma renderFrame do vídeo:
  * um quadro do primeiro vídeo pronto da sequência, com textos e logo por cima.
  * Sem vídeo pronto, mostra o primeiro trecho gravado com uma silhueta no lugar da pessoa.
+ * Se o template tiver uma capa (`thumbnail`), mostra a imagem da capa.
  */
 const props = withDefaults(defineProps<{ entry: TemplateEntry; height?: number }>(), { height: 180 })
 const canvas = ref<HTMLCanvasElement | null>(null)
+/** Capa definida no admin (imagem pronta); quando existe, substitui o quadro desenhado. */
+const cover = props.entry.template.thumbnail ? props.entry.assets[props.entry.template.thumbnail] : undefined
 const { width: cw, height: ch } = props.entry.template.canvas
 const width = Math.round((props.height * cw) / ch)
 const scale = 2
@@ -84,6 +87,7 @@ async function render() {
 }
 
 onMounted(() => {
+  if (cover) return
   // Só carrega quando o card aparece: no celular, evita baixar vídeos de modelos que ninguém viu.
   if (!('IntersectionObserver' in window) || !canvas.value) return void render()
   observer = new IntersectionObserver(
@@ -103,12 +107,14 @@ onBeforeUnmount(() => observer?.disconnect())
 </script>
 
 <template>
-  <canvas ref="canvas" class="thumb" :style="{ width: `${width}px`, height: `${height}px` }" aria-hidden="true" />
+  <img v-if="cover" :src="cover" class="thumb cover" :style="{ width: `${width}px`, height: `${height}px` }" alt="" loading="lazy" />
+  <canvas v-else ref="canvas" class="thumb" :style="{ width: `${width}px`, height: `${height}px` }" aria-hidden="true" />
 </template>
 
 <style scoped>
 .thumb {
   display: block;
+  object-fit: cover;
   border-radius: 12px;
   background: #000;
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);

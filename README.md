@@ -351,6 +351,22 @@ npm run deploy                                       # build + migrações remot
 
 O app fica em `https://gravai.pages.dev` e o admin em `/admin`. Para atualizar depois, basta `npm run deploy`.
 
+**Importar vídeos prontos em lote** (um modelo por vídeo)
+
+`apps/web/scripts/import-videos.mjs` cria um modelo para cada vídeo de um manifesto: um trecho curto gravado pela pessoa ("Seu recado"), o vídeo inteiro e um encerramento com o endereço para compartilhar e o crédito do vídeo. A capa de cada modelo na página inicial é a imagem indicada no manifesto. O manifesto dos vídeos da campanha está em `apps/web/scripts/campanha/manifest.json`.
+
+1. Abra `apps/web/scripts/campanha/baixar.html` no navegador e salve os vídeos e as capas, com os nomes originais, em `apps/web/scripts/campanha/arquivos/`. Essa pasta não vai para o git.
+2. Confira os arquivos sem enviar nada:
+```bash
+node apps/web/scripts/import-videos.mjs --dry-run
+```
+3. Importe e publique em produção (o token é o `ADMIN_TOKEN`):
+```bash
+ADMIN_TOKEN=seu-token node apps/web/scripts/import-videos.mjs --url https://gravai.pages.dev
+```
+
+Rodar de novo atualiza os modelos (nova versão) em vez de duplicar. Com `--rascunho`, salva sem publicar. Vídeos que não estejam em H.264/AAC ou que passem de 95 MB são apontados no final; esses vão pelo admin, que converte no navegador.
+
 **Custos:** D1 e R2 cabem no plano gratuito no começo (5 GB e 10 GB). O R2 não cobra pela transferência de saída, e isso pesa aqui, porque cada usuário baixa os vídeos pré-gravados.
 
 Testes ponta a ponta do admin contra o backend local (login, importação, reordenação, publicação e gravação/exportação com a nova ordem):

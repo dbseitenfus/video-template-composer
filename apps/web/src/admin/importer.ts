@@ -14,9 +14,9 @@ export async function importBundledTemplates(existingIds: string[], onStatus: (s
   const imported: string[] = []
   for (const entry of bundled) {
     if (existingIds.includes(entry.template.id)) continue
-    const { images, audio, videos } = templateAssets(entry.template)
+    const { images, audio, videos, thumbnail } = templateAssets(entry.template)
     const map: Record<string, string> = {}
-    for (const name of [...images, ...audio, ...videos]) {
+    for (const name of [...images, ...audio, ...videos, ...thumbnail]) {
       onStatus(`Enviando ${name}…`)
       const blob = await (await fetch(entry.assets[name]!)).blob()
       const type = TYPES[name.split('.').pop() ?? ''] ?? blob.type

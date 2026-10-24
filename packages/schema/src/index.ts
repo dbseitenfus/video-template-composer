@@ -114,7 +114,7 @@ export const ClipSchema = z.object({
   /** Ponto de início dentro do arquivo, em segundos. */
   trimStart: seconds.default(0),
   /** Duração usada do clipe, em segundos (declarada para a linha do tempo não depender de ler o arquivo). */
-  duration: z.number().positive().max(120),
+  duration: z.number().positive().max(600),
   fit: z.enum(['cover', 'contain']).default('cover'),
   background: ColorSchema.default('#000000'),
   /** Volume do áudio do clipe (0 = mudo). */
@@ -166,6 +166,8 @@ export const TemplateSchema = z
     id: z.string().regex(/^[a-z0-9-]+$/),
     name: z.string().min(1),
     description: z.string().default(''),
+    /** Imagem de capa do modelo na página inicial (asset). Sem ela, a capa é desenhada a partir do vídeo. */
+    thumbnail: z.string().min(1).optional(),
     /** Tamanho de referência; a exportação escala mantendo a proporção. */
     canvas: z.object({
       width: z.number().int().positive(),
@@ -230,8 +232,8 @@ export function safeParseTemplate(data: unknown) {
   return TemplateSchema.safeParse(data)
 }
 
-/** Lista os assets referenciados pelo template (logo, imagens, trilha e clipes). */
-export function templateAssets(template: Template): { images: string[]; audio: string[]; videos: string[] } {
+/** Lista os assets referenciados pelo template (logo, imagens, trilha, clipes e capa). */
+export function templateAssets(template: Template): { images: string[]; audio: string[]; videos: string[]; thumbnail: string[] } {
   const images = new Set<string>()
   const collect = (layers: Layer[]) => {
     for (const layer of layers) if (layer.type === 'image') images.add(layer.asset)
@@ -245,6 +247,8 @@ export function templateAssets(template: Template): { images: string[]; audio: s
     images: [...images],
     audio: template.music ? [template.music.asset] : [],
     videos: [...new Set(template.clips.map((c) => c.asset))],
+    // Separada das imagens do vídeo: a capa só aparece na página inicial, não é desenhada nos quadros.
+    thumbnail: template.thumbnail ? [template.thumbnail] : [],
   }
 }
 

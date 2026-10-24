@@ -159,3 +159,6 @@ dev-dist/
 # Cloudflare (wrangler)
 .wrangler/
 .dev.vars
+
+# Vídeos baixados para o importador (não vão para o git)
+apps/web/scripts/campanha/arquivos/
