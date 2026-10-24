@@ -18,4 +18,6 @@ export const site = {
   privacy: 'Seus vídeos ficam no seu celular. Nada é enviado para servidores.',
   /** Linha opcional no rodapé (ex.: identificação de quem mantém a página). */
   footnote: '',
+  /** Crédito de autoria no rodapé. */
+  credit: { name: 'Daniel Seitenfus', url: 'https://github.com/dbseitenfus' },
 }
