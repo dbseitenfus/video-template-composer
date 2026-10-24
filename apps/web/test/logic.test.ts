@@ -186,4 +186,11 @@ describe('catálogo', () => {
     expect((await loadCatalog(api({ templates: [] }))).source).toBe('bundled')
     expect(parseCatalog(null)).toEqual([])
   })
+
+  it('mantém o destaque marcado no admin', () => {
+    const valid = findTemplate('apresentacao-horizontal')!
+    const [hot, plain] = parseCatalog({ templates: [{ ...valid, featured: true }, { ...valid, featured: 'sim' }] })
+    expect(hot!.featured).toBe(true)
+    expect(plain!.featured).toBeUndefined()
+  })
 })

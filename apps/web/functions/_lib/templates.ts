@@ -6,6 +6,7 @@ export interface TemplateRow {
   draft: string
   sort: number
   archived: number
+  featured: number
   created_at: number
   updated_at: number
 }
@@ -15,13 +16,15 @@ export interface PublishedTemplate {
   version: number
   /** URL de cada asset referenciado, por nome (o nome é a chave no R2). */
   assets: Record<string, string>
+  /** Em destaque ("em alta") na página inicial. */
+  featured?: boolean
 }
 
 export const assetUrl = (key: string) => `/api/assets/${encodeURIComponent(key)}`
 
-export function withAssetUrls(template: Template, version: number): PublishedTemplate {
+export function withAssetUrls(template: Template, version: number, featured = false): PublishedTemplate {
   const { images, audio, videos, thumbnail } = templateAssets(template)
-  return { template, version, assets: Object.fromEntries([...images, ...audio, ...videos, ...thumbnail].map((k) => [k, assetUrl(k)])) }
+  return { template, version, ...(featured ? { featured } : {}), assets: Object.fromEntries([...images, ...audio, ...videos, ...thumbnail].map((k) => [k, assetUrl(k)])) }
 }
 
 /** Valida com o mesmo schema do app; devolve os erros com o caminho de cada campo. */

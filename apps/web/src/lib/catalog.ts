@@ -23,9 +23,9 @@ export function parseCatalog(data: unknown): TemplateEntry[] {
   if (!Array.isArray(list)) return []
   const entries: TemplateEntry[] = []
   for (const item of list) {
-    const raw = item as { template?: unknown; assets?: Record<string, string>; version?: number }
+    const raw = item as { template?: unknown; assets?: Record<string, string>; version?: number; featured?: boolean }
     const parsed = safeParseTemplate(raw.template)
-    if (parsed.success && raw.assets) entries.push({ template: parsed.data, assets: raw.assets, version: raw.version })
+    if (parsed.success && raw.assets) entries.push({ template: parsed.data, assets: raw.assets, version: raw.version, ...(raw.featured === true ? { featured: true } : {}) })
   }
   return entries
 }

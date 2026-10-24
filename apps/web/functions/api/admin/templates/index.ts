@@ -8,6 +8,7 @@ export interface AdminTemplateSummary {
   name: string
   archived: boolean
   sort: number
+  featured: boolean
   updatedAt: number
   publishedVersion: number | null
   publishedAt: number | null
@@ -26,6 +27,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
       name: draft.name,
       archived: !!row.archived,
       sort: row.sort,
+      featured: !!row.featured,
       updatedAt: row.updated_at,
       publishedVersion: v?.version ?? null,
       publishedAt: v?.published_at ?? null,

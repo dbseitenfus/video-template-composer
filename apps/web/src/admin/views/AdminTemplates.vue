@@ -59,6 +59,12 @@ async function setArchived(t: AdminTemplateSummary, value: boolean) {
   await refresh()
 }
 
+/** Destaque ("em alta") na página inicial: só um por vez. */
+async function setFeatured(t: AdminTemplateSummary, value: boolean) {
+  await api.updateMeta(t.id, { featured: value })
+  await refresh()
+}
+
 async function importExamples() {
   error.value = null
   try {
@@ -115,11 +121,15 @@ onMounted(refresh)
           <strong>{{ t.name }}</strong>
           <div class="row meta">
             <span class="badge" :class="state(t).cls">{{ state(t).label }}</span>
+            <span v-if="t.featured" class="badge hot">🔥 Em alta</span>
             <code class="muted">{{ t.id }}</code>
           </div>
         </div>
         <button class="ghost small" :disabled="i === 0" aria-label="Mover para cima" @click="move(i, -1)">↑</button>
         <button class="ghost small" :disabled="i === active.length - 1" aria-label="Mover para baixo" @click="move(i, 1)">↓</button>
+        <button class="ghost small" :data-testid="`feature-${t.id}`" @click="setFeatured(t, !t.featured)">
+          {{ t.featured ? 'Tirar destaque' : 'Destacar' }}
+        </button>
         <button class="ghost small" @click="setArchived(t, true)">Arquivar</button>
         <button class="small" @click="router.push({ name: 'admin-editor', params: { id: t.id } })">Editar</button>
       </li>
@@ -165,6 +175,10 @@ h1 {
   gap: 0.5rem;
   margin-top: 0.25rem;
   font-size: 0.8rem;
+}
+.hot {
+  background: #e30613;
+  color: #fff;
 }
 .archived {
   display: grid;

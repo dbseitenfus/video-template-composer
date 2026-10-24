@@ -8,6 +8,8 @@ export interface TemplateEntry {
   assets: Record<string, string>
   /** Versão publicada no admin; ausente nos templates embutidos no app. */
   version?: number
+  /** Em destaque ("em alta") na página inicial; definido no admin. */
+  featured?: boolean
 }
 
 function assetUrl(name: string): string {

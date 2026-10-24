@@ -56,6 +56,9 @@ function formatLabel(t: Template) {
   return width === height ? 'Quadrado · feed' : width > height ? 'Horizontal · YouTube' : 'Vertical · Stories e WhatsApp'
 }
 
+/** O modelo em destaque ("em alta", marcado no admin) vem primeiro; os outros mantêm a ordem. */
+const orderedEntries = computed(() => [...entries.value].sort((a, b) => Number(!!b.featured) - Number(!!a.featured)))
+
 const templatesSection = ref<HTMLElement | null>(null)
 
 /** Botão principal: com um só modelo, já começa; com vários, leva até a lista. */
@@ -165,9 +168,21 @@ async function choose(entry: TemplateEntry) {
       <section ref="templatesSection" class="templates" aria-labelledby="modelos">
         <h2 id="modelos">Escolha o modelo</h2>
         <p v-if="source === 'cache'" class="muted small">Sem conexão: mostrando os modelos da última visita.</p>
-        <article v-for="entry in entries" :key="entry.template.id" class="template" :data-testid="`template-${entry.template.id}`">
-          <div class="thumb-box"><TemplateThumb :entry="entry" :height="168" /></div>
+        <article
+          v-for="entry in orderedEntries"
+          :key="entry.template.id"
+          class="template"
+          :class="{ featured: entry.featured }"
+          :data-testid="`template-${entry.template.id}`"
+        >
+          <div class="thumb-box"><TemplateThumb :entry="entry" :height="entry.featured ? 260 : 168" /></div>
           <div class="body">
+            <span v-if="entry.featured" class="hot" data-testid="hot-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor" d="M13.5 1.5s.7 3.3-1.6 6.1C9.9 10 8 11.5 8 14.5a4 4 0 0 0 8 0c0-1.3-.5-2.4-1-3.2 2.4 1 4 3.6 4 6.2A7 7 0 0 1 5 17.5C5 11 11 9 13.5 1.5Z" />
+              </svg>
+              Em alta
+            </span>
             <h3>{{ entry.template.name }}</h3>
             <p class="muted">{{ entry.template.description }}</p>
             <ul class="chips">
@@ -433,6 +448,35 @@ h2 {
   background: var(--surface-2);
   color: var(--muted);
 }
+/* Modelo em destaque: card maior, borda vermelha e selo "Em alta". */
+.template.featured {
+  padding: 1.1rem;
+  border: 2px solid var(--red);
+  border-top-width: 5px;
+  box-shadow: 0 12px 32px rgb(227 6 19 / 0.16);
+}
+.template.featured .thumb-box {
+  width: 220px;
+}
+.template.featured .thumb-box :deep(.thumb) {
+  max-height: 260px;
+}
+.template.featured .body h3 {
+  font-size: 1.35rem;
+}
+.hot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
 /* Coluna fixa para a miniatura: formatos diferentes não desalinham o texto. */
 .thumb-box {
   flex: none;
@@ -460,6 +504,18 @@ h2 {
   .thumb-box :deep(.thumb) {
     max-height: 140px;
     border-radius: 8px;
+  }
+  .template.featured {
+    padding: 0.9rem;
+  }
+  .template.featured .thumb-box {
+    width: 120px;
+  }
+  .template.featured .thumb-box :deep(.thumb) {
+    max-height: 210px;
+  }
+  .template.featured .body h3 {
+    font-size: 1.15rem;
   }
   .body h3 {
     font-size: 1rem;

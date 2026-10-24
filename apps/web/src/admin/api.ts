@@ -25,6 +25,7 @@ export interface AdminTemplateSummary {
   name: string
   archived: boolean
   sort: number
+  featured: boolean
   updatedAt: number
   publishedVersion: number | null
   publishedAt: number | null
@@ -116,7 +117,7 @@ export const api = {
     request<{ template: Template }>('/templates', { method: 'POST', body: JSON.stringify(template) }).then((r) => r.template),
   saveTemplate: (id: string, template: unknown) =>
     request<{ template: Template }>(`/templates/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify({ template }) }).then((r) => r.template),
-  updateMeta: (id: string, meta: { sort?: number; archived?: boolean }) =>
+  updateMeta: (id: string, meta: { sort?: number; archived?: boolean; featured?: boolean }) =>
     request(`/templates/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(meta) }),
   publish: (id: string) => request<{ version: number }>(`/templates/${encodeURIComponent(id)}/publish`, { method: 'POST' }).then((r) => r.version),
   listAssets: () => request<{ assets: Asset[] }>('/assets').then((r) => r.assets),
