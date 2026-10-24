@@ -132,7 +132,7 @@ const template = {
       id: 'abertura',
       label: 'Abertura',
       // Mesmo início do modelo de origem (roteiro próprio de cada vídeo), avisando das pausas.
-      script: `${first?.script ?? `Separei um vídeo que todo mundo precisa ver: "${source.name}".`}\nNo meio eu paro pra comentar.`,
+      script: `${first?.script ?? `Para tudo e assiste esse vídeo: "${source.name}".`}\nE no meio eu paro pra dizer o que eu penso.`,
       minDuration: 3,
       maxDuration: 15,
       fit: 'cover',
@@ -146,8 +146,8 @@ const template = {
       // o roteiro se refere a ela sem supor que a pessoa está vendo o vídeo agora.
       script:
         i === 0
-          ? 'Fale com suas palavras o que mais chamou sua atenção no trecho que você viu.\nPode ser curto: uma ou duas frases.'
-          : 'Agora diga o que você pensa sobre esse outro trecho.\nSe quiser, termine pedindo pra assistirem até o fim.',
+          ? 'Viu isso? Diz com as suas palavras o que mais te incomodou nesse trecho.\nUma ou duas frases bastam: o que vale é ser você falando.'
+          : 'E agora, o que você acha disso?\nFala do coração e termina pedindo pra assistirem até o fim.',
       minDuration: 3,
       maxDuration: 20,
       fit: 'cover',
