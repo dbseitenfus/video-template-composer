@@ -351,6 +351,16 @@ npm run deploy                                       # build + migrações remot
 
 O app fica em `https://gravai.pages.dev` e o admin em `/admin`. Para atualizar depois, basta `npm run deploy`.
 
+**Modelos com pausas para comentar**
+
+`apps/web/scripts/create-pause-template.mjs` cria, a partir de um modelo publicado, uma versão em que o vídeo pronto é dividido em partes com um comentário gravado entre elas: abertura → parte 1 → comentário 1 → parte 2 → comentário 2 → parte 3 → encerramento. As partes reaproveitam o arquivo já enviado (só mudam início e duração) e os cortes caem nas trocas de cena mais próximas de partes iguais (detectadas com o ffmpeg no arquivo local do vídeo).
+
+```bash
+node apps/web/scripts/create-pause-template.mjs --from campanha-5-perguntas --pausas 2 --url https://gravai.pages.dev
+```
+
+O modelo novo ganha o id `<origem>-pausas` e o nome "<título> (com comentários)". Use `--dry-run` para ver os cortes antes, `--pausas 1` para uma pausa só, ou `--cortes 24.5,51` para escolher os pontos à mão. O mesmo resultado pode ser montado no admin, adicionando trechos gravados e repetindo o vídeo com início e duração diferentes.
+
 **Contagem de uso (analytics)**
 
 O app conta, de forma anônima, as etapas do funil: visita (uma por sessão), modelo escolhido, trecho gravado, exportação iniciada, vídeo pronto, falha na exportação e vídeo compartilhado ou baixado. Cada evento leva só a etapa, o id do modelo e o tipo de aparelho (iPhone, Android, computador). A rota `POST /api/contagem` (nome neutro, para não ser barrada por bloqueadores de anúncio; `/api/events` continua aceita) soma contadores por dia (horário de Brasília) na tabela `usage_daily` do D1, sem IP, sem cookies e sem nada dos vídeos. Os números ficam no admin, em **Uso** (`/admin/uso`).
