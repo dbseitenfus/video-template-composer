@@ -13,11 +13,17 @@
  *     --url https://gravai.pages.dev
  *
  * Opções:
- *   --dry-run   só confere os arquivos e mostra o que seria criado (não precisa de token)
+ *   --dry-run   só confere (e converte, se preciso) os arquivos e mostra o que seria criado;
+ *               não envia nada e não precisa de token
  *   --rascunho  salva os modelos sem publicar
+ *
+ * Vídeos que não estejam em H.264/AAC (ex.: HEVC) são convertidos com o ffmpeg, se estiver
+ * instalado, para a subpasta `convertidos/`. Os arquivos originais não são alterados.
  */
-import { readFile, stat } from 'node:fs/promises'
+import { execFile } from 'node:child_process'
+import { mkdir, readFile, stat } from 'node:fs/promises'
 import { join } from 'node:path'
+import { promisify } from 'node:util'
 import { ALL_FORMATS, FilePathSource, Input } from 'mediabunny'
 
 const args = process.argv.slice(2)
@@ -56,6 +62,33 @@ async function probe(path) {
   }
 }
 
+const run = promisify(execFile)
+const hasFfmpeg = await run('ffmpeg', ['-version']).then(() => true, () => false)
+const isCompatible = (info) => info.codec === 'avc' && (!info.audioCodec || info.audioCodec === 'aac')
+
+/**
+ * Garante um arquivo em H.264/AAC: devolve o original se já estiver no formato,
+ * senão converte (uma vez) para `convertidos/` mantendo a resolução.
+ */
+async function ensureCompatible(path, name) {
+  const info = await probe(path)
+  if (isCompatible(info)) return { path, info, converted: false }
+  if (!hasFfmpeg) throw new Error(`${name} está em ${info.codec}/${info.audioCodec}: instale o ffmpeg ou envie pelo admin, que converte`)
+  const outDir = join(dir, 'convertidos')
+  const out = join(outDir, name.replace(/\.[^.]+$/, '') + '.mp4')
+  const [src, done] = await Promise.all([stat(path), stat(out).catch(() => null)])
+  if (!done || done.mtimeMs < src.mtimeMs) {
+    await mkdir(outDir, { recursive: true })
+    process.stdout.write(`  convertendo ${name} (${info.codec} → H.264)… `)
+    const audio = info.audioCodec === 'aac' ? ['-c:a', 'copy'] : ['-c:a', 'aac', '-b:a', '160k']
+    await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', path, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '22', '-pix_fmt', 'yuv420p', ...audio, '-movflags', '+faststart', out])
+    console.log('ok')
+  }
+  const convertedInfo = await probe(out)
+  if (!isCompatible(convertedInfo)) throw new Error(`a conversão de ${name} não gerou H.264/AAC`)
+  return { path: out, info: convertedInfo, converted: true }
+}
+
 async function api(path, init = {}) {
   const headers = { authorization: `Bearer ${token}`, ...(init.headers ?? {}) }
   const res = await fetch(`${baseUrl}/api/admin${path}`, { ...init, headers })
@@ -88,7 +121,7 @@ function buildTemplate(item, videoKey, coverKey, info) {
     id: item.id,
     name: item.title,
     description: 'Grave um recado curto e compartilhe este vídeo da campanha.',
-    thumbnail: coverKey,
+    ...(coverKey ? { thumbnail: coverKey } : {}),
     canvas: CANVAS,
     fps: 30,
     resolutions: [1080, 720],
@@ -134,6 +167,7 @@ function buildTemplate(item, videoKey, coverKey, info) {
 
 let ok = 0
 const problems = []
+const missingCovers = []
 for (const [n, item] of manifest.videos.entries()) {
   const label = `[${n + 1}/${manifest.videos.length}] ${item.title}`
   const videoPath = join(dir, item.video)
@@ -141,21 +175,23 @@ for (const [n, item] of manifest.videos.entries()) {
   try {
     const [vs, cs] = await Promise.all([stat(videoPath).catch(() => null), stat(coverPath).catch(() => null)])
     if (!vs) throw new Error(`falta o arquivo ${item.video}`)
-    if (!cs) throw new Error(`falta a capa ${item.cover}`)
-    if (vs.size > MAX_BYTES) throw new Error(`${item.video} tem ${(vs.size / 1048576).toFixed(0)} MB (máximo 95 MB): envie pelo admin, que converte`)
-    const info = await probe(videoPath)
-    if (info.codec !== 'avc' || (info.audioCodec && info.audioCodec !== 'aac')) {
-      throw new Error(`${item.video} está em ${info.codec}/${info.audioCodec}: envie pelo admin, que converte para H.264/AAC`)
-    }
-    const summary = `${info.width}×${info.height}, ${info.duration.toFixed(1)} s, ${(vs.size / 1048576).toFixed(1)} MB`
+    const ready = await ensureCompatible(videoPath, item.video)
+    const info = ready.info
+    const size = (await stat(ready.path)).size
+    if (size > MAX_BYTES) throw new Error(`${item.video} tem ${(size / 1048576).toFixed(0)} MB (máximo 95 MB)`)
+    const summary = `${info.width}×${info.height}, ${info.duration.toFixed(1)} s, ${(size / 1048576).toFixed(1)} MB${ready.converted ? ', convertido para H.264' : ''}`
+    // Sem a capa, o modelo é criado mesmo assim e a miniatura vira um quadro do vídeo.
+    // Rodar de novo depois de baixar a capa atualiza o modelo.
+    const coverNote = cs ? '' : ` · sem capa (${item.cover}): a miniatura será um quadro do vídeo`
+    if (!cs) missingCovers.push(item.cover)
     if (dryRun) {
-      console.log(`${label}: ok (${summary}) → ${item.id}`)
+      console.log(`${label}: ok (${summary})${coverNote}`)
       ok++
       continue
     }
-    console.log(`${label}: enviando (${summary})…`)
-    const videoKey = await upload(videoPath, item.video, 'video/mp4', info)
-    const coverKey = await upload(coverPath, item.cover, 'image/jpeg')
+    console.log(`${label}: enviando (${summary})${coverNote}…`)
+    const videoKey = await upload(ready.path, item.video, 'video/mp4', info)
+    const coverKey = cs ? await upload(coverPath, item.cover, 'image/jpeg') : undefined
     const template = buildTemplate(item, videoKey, coverKey, info)
     try {
       await api('/templates', { method: 'POST', body: JSON.stringify(template), headers: { 'content-type': 'application/json' } })
@@ -177,6 +213,9 @@ for (const [n, item] of manifest.videos.entries()) {
 }
 
 console.log(`\n${ok} de ${manifest.videos.length} ${dryRun ? 'conferidos' : publish ? 'publicados' : 'salvos'}.`)
+if (missingCovers.length) {
+  console.log(`${missingCovers.length} sem capa (a miniatura será um quadro do vídeo). Baixe as capas e rode de novo para usar as do site.`)
+}
 if (problems.length) {
   console.log('Pendências:\n' + problems.map((p) => `- ${p}`).join('\n'))
   process.exitCode = 1
