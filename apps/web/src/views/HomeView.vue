@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import type { TemplateEntry } from '@takeslot/templates'
 import type { Template } from '@takeslot/schema'
@@ -20,6 +20,13 @@ const checking = ref(true)
 const lostTakes = ref(0)
 const entries = shallowRef<TemplateEntry[]>([])
 const source = ref<CatalogSource | null>(null)
+
+// Fundo claro também na área de rolagem elástica (iOS) enquanto a página inicial está aberta.
+const previousBodyBackground = document.body.style.background
+document.body.style.background = '#f7f8fb'
+onBeforeUnmount(() => {
+  document.body.style.background = previousBodyBackground
+})
 
 onMounted(async () => {
   const [, catalog] = await Promise.all([check(), loadCatalog()])
@@ -168,8 +175,9 @@ async function choose(entry: TemplateEntry) {
 
 <style scoped>
 /*
- * Paleta da página inicial: azul, verde e amarelo da bandeira com o vermelho como destaque.
- * Sobrescreve as variáveis globais só aqui; as outras telas mantêm o tema padrão.
+ * Paleta da página inicial: fundo claro, com o verde, o amarelo e o azul da bandeira
+ * e o vermelho como destaque usados em pontos pequenos (faixa, selo, botões, números).
+ * Sobrescreve as variáveis globais só aqui; as outras telas mantêm o tema escuro.
  */
 .home-bg {
   --br-green: #009c3b;
@@ -177,17 +185,18 @@ async function choose(entry: TemplateEntry) {
   --br-blue: #002776;
   --red: #e30613;
   --accent: var(--red);
-  --bg: #061633;
-  --surface: #0b2250;
-  --surface-2: #133069;
-  --border: #21407f;
-  --muted: #b3c2e2;
+  --text: #0f1b3d;
+  --muted: #55607a;
+  --bg: #f7f8fb;
+  --surface: #ffffff;
+  --surface-2: #eef1f7;
+  --border: #e1e5ee;
+  --warn: #b45309;
+  --danger: #c81e2d;
+  color-scheme: light;
   min-height: 100dvh;
   color: var(--text);
-  background:
-    radial-gradient(60rem 40rem at 110% -10%, rgb(227 6 19 / 0.22), transparent 60%),
-    radial-gradient(50rem 40rem at -20% 60%, rgb(0 156 59 / 0.16), transparent 60%),
-    var(--bg);
+  background: var(--bg);
 }
 .home {
   width: min(760px, 100%);
@@ -205,9 +214,9 @@ async function choose(entry: TemplateEntry) {
   gap: 0.9rem;
   justify-items: start;
   background:
-    radial-gradient(120% 90% at 100% 0%, rgb(227 6 19 / 0.75), transparent 62%),
-    radial-gradient(90% 70% at 0% 100%, rgb(0 156 59 / 0.45), transparent 60%),
-    linear-gradient(160deg, #0a2a6b, var(--br-blue));
+    radial-gradient(70% 60% at 100% 0%, rgb(227 6 19 / 0.08), transparent 70%),
+    radial-gradient(60% 60% at 0% 100%, rgb(0 156 59 / 0.08), transparent 70%),
+    var(--surface);
   border-bottom: 1px solid var(--border);
 }
 /* Faixa com as cores do Brasil no topo. */
@@ -227,6 +236,7 @@ async function choose(entry: TemplateEntry) {
     border: 1px solid var(--border);
     border-radius: 24px;
     padding: 2.5rem 2.25rem 2rem;
+    box-shadow: 0 12px 40px rgb(15 27 61 / 0.08);
   }
 }
 .eyebrow {
@@ -245,12 +255,13 @@ h1 {
   letter-spacing: -0.02em;
   margin: 0;
   text-wrap: balance;
+  color: var(--br-blue);
 }
 .lead {
   margin: 0;
   font-size: 1.05rem;
   line-height: 1.5;
-  color: #eef2fb;
+  color: #33405e;
   max-width: 36rem;
 }
 .hero-actions {
@@ -263,9 +274,7 @@ h1 {
   font-size: 1.05rem;
   padding: 0.95rem 1.6rem;
   background: var(--red);
-  box-shadow:
-    0 0 0 3px rgb(255 223 0 / 0.9),
-    0 12px 28px rgb(227 6 19 / 0.45);
+  box-shadow: 0 10px 24px rgb(227 6 19 / 0.28);
 }
 .cta:hover:not(:disabled) {
   background: #c40512;
@@ -276,7 +285,7 @@ h1 {
   gap: 0.4rem;
   margin: 0;
   font-size: 0.85rem;
-  color: #d5def2;
+  color: var(--muted);
 }
 h2 {
   font-size: 1.25rem;
@@ -359,6 +368,7 @@ h2 {
   border: 1px solid var(--border);
   border-top: 3px solid var(--br-yellow);
   border-radius: 16px;
+  box-shadow: 0 4px 16px rgb(15 27 61 / 0.05);
 }
 .body {
   flex: 1;
@@ -459,7 +469,8 @@ h2 {
   max-width: 34rem;
   margin: 0 auto 0.5rem !important;
   padding: 0.75rem 0.9rem;
-  border: 1px solid rgb(255 223 0 / 0.35);
+  border: 1px solid var(--border);
+  background: var(--surface);
   border-radius: 10px;
   scroll-margin-top: 1rem;
 }
@@ -468,11 +479,9 @@ h2 {
   font-size: 0.8rem;
   color: var(--muted);
 }
-.disclaimer-short {
-  color: #d5def2;
-}
 .disclaimer-short a {
-  color: var(--br-yellow);
+  color: var(--br-blue);
+  font-weight: 600;
 }
 .credit a {
   display: inline-flex;
