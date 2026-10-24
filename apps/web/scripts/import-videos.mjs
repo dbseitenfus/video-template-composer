@@ -6,8 +6,8 @@
  * e um encerramento com o endereço para compartilhar e o crédito do vídeo. A capa do
  * modelo na página inicial é a imagem indicada no manifesto.
  *
- * Uso (na raiz do repositório):
- *   ADMIN_TOKEN=... node apps/web/scripts/import-videos.mjs \
+ * Uso (na raiz do repositório; sem ADMIN_TOKEN, o token é pedido no terminal sem aparecer na tela):
+ *   node apps/web/scripts/import-videos.mjs \
  *     --manifest apps/web/scripts/campanha/manifest.json \
  *     --dir apps/web/scripts/campanha/arquivos \
  *     --url https://gravai.pages.dev
@@ -38,12 +38,39 @@ const dir = opt('dir', 'apps/web/scripts/campanha/arquivos')
 const baseUrl = opt('url', 'https://gravai.pages.dev').replace(/\/$/, '')
 const dryRun = flag('dry-run')
 const publish = !flag('rascunho')
-const token = process.env.ADMIN_TOKEN
 const MAX_BYTES = 95 * 1024 * 1024
 const CANVAS = { width: 1080, height: 1920 }
 
+/** Pede o token no terminal sem mostrar o que é digitado (para não ficar na tela nem no histórico). */
+async function askToken() {
+  if (!process.stdin.isTTY) return ''
+  process.stdout.write('Token do admin (não aparece na tela): ')
+  process.stdin.setRawMode(true)
+  process.stdin.resume()
+  process.stdin.setEncoding('utf8')
+  let value = ''
+  return new Promise((resolve) => {
+    const onData = (chunk) => {
+      for (const ch of chunk) {
+        if (ch === '\r' || ch === '\n') {
+          process.stdin.setRawMode(false)
+          process.stdin.pause()
+          process.stdin.off('data', onData)
+          process.stdout.write('\n')
+          return resolve(value.trim())
+        }
+        if (ch === '\u0003') process.exit(130) // Ctrl+C
+        if (ch === '\u007f') value = value.slice(0, -1)
+        else value += ch
+      }
+    }
+    process.stdin.on('data', onData)
+  })
+}
+
+const token = dryRun ? '' : process.env.ADMIN_TOKEN || (await askToken())
 if (!dryRun && !token) {
-  console.error('Defina ADMIN_TOKEN (o token do admin) ou use --dry-run.')
+  console.error('Sem token: defina ADMIN_TOKEN ou rode num terminal para digitar o token. Para só conferir, use --dry-run.')
   process.exit(1)
 }
 
