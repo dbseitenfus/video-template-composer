@@ -2,6 +2,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CameraView from '../components/CameraView.vue'
+import ClipPartPreview from '../components/ClipPartPreview.vue'
+import { templateSequence } from '@takeslot/schema'
 import Teleprompter from '../components/Teleprompter.vue'
 import { useCamera } from '../composables/useCamera'
 import { useRecorder } from '../composables/useRecorder'
@@ -29,6 +31,18 @@ const slot = computed(() => template.value.slots.find((s) => s.id === route.para
 const slotIndex = computed(() => template.value.slots.indexOf(slot.value))
 const aspect = computed(() => template.value.canvas.width / template.value.canvas.height)
 const remaining = computed(() => Math.max(0, slot.value.maxDuration - recorder.elapsed.value))
+/** Parte do vídeo pronto que toca logo antes deste trecho, se houver (a pessoa precisa vê-la antes de comentar). */
+const previousClip = computed(() => {
+  const seq = templateSequence(template.value)
+  const i = seq.findIndex((item) => item.kind === 'slot' && item.slot.id === slot.value.id)
+  const prev = i > 0 ? seq[i - 1] : undefined
+  if (prev?.kind !== 'clip') return null
+  const src = project.entry?.assets[prev.clip.asset]
+  return src ? { src, start: prev.clip.trimStart, duration: prev.clip.duration, title: prev.clip.label } : null
+})
+const showClip = ref(false)
+watch(previousClip, (clip) => (showClip.value = !!clip), { immediate: true })
+
 const tooShort = computed(() => recorder.recording.value && recorder.elapsed.value < slot.value.minDuration)
 
 const cameraMessage = computed(() => {
@@ -99,7 +113,18 @@ async function back() {
         <div class="bar">
           <button class="ghost small on-video" :disabled="saving" @click="back">Voltar</button>
           <span class="slot-name">{{ slotIndex + 1 }}/{{ template.slots.length }} · {{ slot.label }}</span>
-          <button class="ghost small on-video" :disabled="recorder.recording.value || countdown > 0" @click="camera.switchCamera()">Virar</button>
+          <div class="row tools">
+            <button
+              v-if="previousClip"
+              class="ghost small on-video"
+              :disabled="recorder.recording.value || countdown > 0"
+              data-testid="show-clip-part"
+              @click="showClip = true"
+            >
+              Ver o trecho
+            </button>
+            <button class="ghost small on-video" :disabled="recorder.recording.value || countdown > 0" @click="camera.switchCamera()">Virar</button>
+          </div>
         </div>
         <Teleprompter :script="slot.script" :active="recorder.recording.value" />
       </div>
@@ -127,6 +152,14 @@ async function back() {
         />
       </div>
     </CameraView>
+    <ClipPartPreview
+      v-if="showClip && previousClip"
+      :src="previousClip.src"
+      :start="previousClip.start"
+      :duration="previousClip.duration"
+      :title="previousClip.title"
+      @close="showClip = false"
+    />
   </main>
 </template>
 
@@ -149,6 +182,10 @@ async function back() {
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
   background: rgb(0 0 0 / 0.72);
+}
+.tools {
+  gap: 0.35rem;
+  flex-wrap: nowrap;
 }
 .slot-name {
   font-weight: 700;

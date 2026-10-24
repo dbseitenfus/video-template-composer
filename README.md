@@ -359,7 +359,7 @@ O app fica em `https://gravai.pages.dev` e o admin em `/admin`. Para atualizar d
 node apps/web/scripts/create-pause-template.mjs --from campanha-5-perguntas --pausas 2 --url https://gravai.pages.dev
 ```
 
-O modelo novo ganha o id `<origem>-pausas` e o nome "<título> (com comentários)". Use `--dry-run` para ver os cortes antes, `--pausas 1` para uma pausa só, ou `--cortes 24.5,51` para escolher os pontos à mão. O mesmo resultado pode ser montado no admin, adicionando trechos gravados e repetindo o vídeo com início e duração diferentes.
+Como a pessoa não vê o vídeo enquanto grava, a tela de gravação de cada comentário mostra antes a parte do vídeo que vem logo antes dele (e um botão "Ver o trecho" para rever); os roteiros se referem a esse trecho. O modelo novo ganha o id `<origem>-pausas` e o nome "<título> (com comentários)". Use `--dry-run` para ver os cortes antes, `--pausas 1` para uma pausa só, ou `--cortes 24.5,51` para escolher os pontos à mão. O mesmo resultado pode ser montado no admin, adicionando trechos gravados e repetindo o vídeo com início e duração diferentes.
 
 **Contagem de uso (analytics)**
 

@@ -142,10 +142,12 @@ const template = {
     ...parts.slice(1).map((_, i) => ({
       id: `comentario-${i + 1}`,
       label: `Comentário ${i + 1}`,
+      // Antes de gravar, o app mostra a parte do vídeo que vem antes deste comentário;
+      // o roteiro se refere a ela sem supor que a pessoa está vendo o vídeo agora.
       script:
         i === 0
-          ? 'Pausa! Comente com suas palavras o que acabou de ver. Depois o vídeo continua.'
-          : 'Mais uma pausa: o que você acha disso? Comente rapidinho e o vídeo segue até o fim.',
+          ? 'Fale com suas palavras o que mais chamou sua atenção no trecho que você viu.\nPode ser curto: uma ou duas frases.'
+          : 'Agora diga o que você pensa sobre esse outro trecho.\nSe quiser, termine pedindo pra assistirem até o fim.',
       minDuration: 3,
       maxDuration: 20,
       fit: 'cover',
