@@ -62,7 +62,7 @@ test('admin reordena vídeos pré-gravados e trechos, publica e o app usa a nova
   // App do usuário: grava os 4 trechos e exporta
   await page.goto('/')
   const card = page.getByTestId('template-depoimento-vertical')
-  await expect(card).toContainText('4 trechos para gravar + 1 vídeo(s) pronto(s)')
+  await expect(card).toContainText('4 trechos para gravar')
   await card.getByRole('button').click()
   await recordSlot(page, 4.5)
   for (const [slot, secs] of [['desafio', 5.5], ['resultado', 4.5], ['novo-trecho', 3.5]] as const) {

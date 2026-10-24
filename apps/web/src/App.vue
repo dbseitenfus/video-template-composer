@@ -2,10 +2,11 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProjectStore } from './stores/project'
+import BrandMark from './components/BrandMark.vue'
 
 const route = useRoute()
 const project = useProjectStore()
-const fullscreen = computed(() => route.name === 'record')
+const fullscreen = computed(() => route.name === 'record' || route.name === 'home')
 const admin = computed(() => !!route.meta.admin)
 const steps = [
   { name: 'home', label: 'Template' },
@@ -18,7 +19,7 @@ const current = computed(() => steps.findIndex((s) => s.name === route.name))
 
 <template>
   <header v-if="!fullscreen" class="topbar">
-    <RouterLink to="/" class="brand">gravaí</RouterLink>
+    <RouterLink to="/" class="brand" aria-label="Início"><BrandMark :size="26" /></RouterLink>
     <ol v-if="project.template && !admin" class="steps" aria-label="Etapas">
       <li v-for="(step, i) in steps" :key="step.name" :class="{ done: i < current, current: i === current }">{{ step.label }}</li>
     </ol>
