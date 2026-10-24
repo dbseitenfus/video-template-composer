@@ -3,14 +3,16 @@ import { computed, markRaw, onBeforeUnmount, onMounted, ref, shallowRef, watch }
 import {
   buildTimeline,
   clipKey,
-  gainAt,
+  decodeAudioUrl,
+  decodeTakeAudio,
   locate,
-  musicGainKeyframes,
+  mixAudio,
   renderFrame,
   videoKey,
   type FrameSource,
   type Located,
   type SizedImage,
+  type VideoSegment,
 } from '@takeslot/engine'
 import type { TemplateEntry } from '@takeslot/templates'
 import { templateAssets } from '@takeslot/schema'
@@ -20,6 +22,10 @@ import { formatDuration } from '../lib/format'
 /*
  * Preview: o componente só controla o relógio e o canvas; quem desenha é a mesma
  * `renderFrame` usada pelo Worker de exportação.
+ *
+ * O som é a mesma mixagem da exportação (falas normalizadas, clipes e trilha com ducking),
+ * tocada pela Web Audio, e é ela que dita o relógio. Os <video> ficam sempre mudos: no iOS,
+ * vídeo com som só pode dar play dentro de um toque, e os trechos seguintes ficariam parados.
  */
 
 const props = defineProps<{
@@ -32,13 +38,14 @@ const props = defineProps<{
 }>()
 
 const canvas = ref<HTMLCanvasElement | null>(null)
+const sources = ref<HTMLDivElement | null>(null)
 const playing = ref(false)
 const time = ref(0)
 const loading = ref(true)
+const loadingLabel = ref('Carregando vídeos…')
 
 const template = computed(() => props.entry.template)
 const timeline = computed(() => buildTimeline(template.value, props.takeDurations))
-const musicCurve = computed(() => musicGainKeyframes(template.value, timeline.value))
 
 // Objetos de mídia ficam fora da reatividade.
 /** Um elemento de vídeo por take (id do slot) e por clipe fixo (`clip:<id>`). */
@@ -46,12 +53,23 @@ const videos = shallowRef<Record<string, HTMLVideoElement>>({})
 const images: Record<string, SizedImage> = {}
 const objectUrls: string[] = []
 let audioCtx: AudioContext | null = null
-let musicBuffer: AudioBuffer | null = null
-let musicNodes: { src: AudioBufferSourceNode; gain: GainNode } | null = null
+/** Mixagem completa do vídeo, igual à da exportação. */
+let mix: AudioBuffer | null = null
+let mixSource: AudioBufferSourceNode | null = null
 let raf = 0
+/** Relógio: instante do vídeo em `clockOffset` quando o relógio de referência marcava `clockStart`. */
 let clockStart = 0
 let clockOffset = 0
 let activeKey: string | null = null
+let lastSeekAt = 0
+let loadToken = 0
+
+/** Arquivos de clipes já baixados, compartilhados entre previews (o admin recria o preview a cada edição). */
+const clipBlobs = new Map<string, Promise<Blob>>()
+const fetchBlob = (url: string) => {
+  if (!clipBlobs.has(url)) clipBlobs.set(url, fetch(url).then((r) => r.blob()))
+  return clipBlobs.get(url)!
+}
 
 /** Resolução do canvas do preview: proporção do template, lado maior ~720 px. */
 const size = computed(() => {
@@ -60,13 +78,18 @@ const size = computed(() => {
   return { width: Math.round(width * scale), height: Math.round(height * scale) }
 })
 
-async function createVideo(src: string, volume: number): Promise<HTMLVideoElement> {
+async function createVideo(blob: Blob): Promise<HTMLVideoElement> {
+  const url = URL.createObjectURL(blob)
+  objectUrls.push(url)
   const v = document.createElement('video')
-  v.src = src
+  v.muted = true
+  v.defaultMuted = true
   v.playsInline = true
+  v.setAttribute('playsinline', '')
   v.preload = 'auto'
-  v.volume = volume
-  v.muted = volume === 0
+  v.src = url
+  // No DOM (invisível): o Safari do iOS só decodifica quadros de vídeos anexados à página.
+  sources.value?.append(v)
   await new Promise<void>((resolve) => {
     v.addEventListener('loadeddata', () => resolve(), { once: true })
     v.addEventListener('error', () => resolve(), { once: true })
@@ -76,20 +99,26 @@ async function createVideo(src: string, volume: number): Promise<HTMLVideoElemen
 }
 
 async function load() {
+  const token = ++loadToken
   loading.value = true
+  loadingLabel.value = 'Carregando vídeos…'
   const vids: Record<string, HTMLVideoElement> = {}
+  const blobs: Record<string, Blob> = {}
   await Promise.all([
     ...Object.entries(props.takePaths ?? {}).map(async ([slotId, path]) => {
       const file = await readFile(path)
       if (!file) return
-      const url = URL.createObjectURL(file)
-      objectUrls.push(url)
-      vids[slotId] = await createVideo(url, 1)
+      blobs[slotId] = file
+      vids[slotId] = await createVideo(file)
     }),
     ...template.value.clips.map(async (clip) => {
-      vids[clipKey(clip.id)] = await createVideo(props.entry.assets[clip.asset]!, clip.volume)
+      // Baixado inteiro e tocado como arquivo local: não depende de Range no servidor.
+      const blob = await fetchBlob(props.entry.assets[clip.asset]!)
+      blobs[clipKey(clip.id)] = blob
+      vids[clipKey(clip.id)] = await createVideo(blob)
     }),
   ])
+  if (token !== loadToken) return
   videos.value = vids
 
   const { images: imageNames } = templateAssets(template.value)
@@ -101,6 +130,26 @@ async function load() {
       images[name] = { image: img, width: img.naturalWidth, height: img.naturalHeight }
     }),
   )
+
+  loadingLabel.value = 'Preparando o áudio…'
+  try {
+    const takes: Record<string, AudioBuffer | null> = {}
+    const clips: Record<string, AudioBuffer | null> = {}
+    for (const slot of template.value.slots) if (blobs[slot.id]) takes[slot.id] = await decodeTakeAudio(blobs[slot.id]!)
+    for (const clip of template.value.clips) {
+      const blob = blobs[clipKey(clip.id)]
+      if (blob && clip.volume > 0) clips[clip.id] = await decodeTakeAudio(blob)
+    }
+    const musicUrl = template.value.music ? props.entry.assets[template.value.music.asset] : undefined
+    const music = musicUrl ? await decodeAudioUrl(musicUrl) : null
+    const mixed = await mixAudio({ template: template.value, timeline: timeline.value, takes, clips, music })
+    if (token !== loadToken) return
+    mix = new AudioBuffer({ length: mixed.channels[0]!.length, numberOfChannels: mixed.channels.length, sampleRate: mixed.sampleRate })
+    mixed.channels.forEach((data, c) => mix!.copyToChannel(data as Float32Array<ArrayBuffer>, c))
+  } catch {
+    // Sem áudio o preview continua funcionando, em silêncio, com relógio próprio.
+    mix = null
+  }
   loading.value = false
   draw()
 }
@@ -138,8 +187,13 @@ function placeholder(label: string): FrameSource {
   return frame
 }
 
+/** Relógio de referência: o do áudio quando há mixagem tocando, senão o do sistema. */
+function reference(): number {
+  return mixSource && audioCtx ? audioCtx.currentTime : performance.now() / 1000
+}
+
 function now() {
-  return playing.value ? clockOffset + (performance.now() - clockStart) / 1000 : time.value
+  return playing.value ? clockOffset + (reference() - clockStart) : time.value
 }
 
 function draw() {
@@ -153,16 +207,30 @@ function draw() {
   renderFrame(ctx, template.value, t, { timeline: timeline.value, frame, images })
 }
 
+const fileOffset = (segment: VideoSegment) => (segment.kind === 'clip' ? segment.clip.trimStart : 0)
+
 /** Vídeo do segmento ativo (take ou clipe) e o tempo correspondente dentro do arquivo. */
-function activeVideo(located: Located | null): { key: string; video: HTMLVideoElement | undefined; time: number } | null {
+function activeVideo(located: Located | null): { key: string; video: HTMLVideoElement | undefined; time: number; index: number } | null {
   const segment = located?.segment
   if (!located || !segment || (segment.kind !== 'slot' && segment.kind !== 'clip')) return null
   const key = videoKey(segment)
-  const offset = segment.kind === 'clip' ? segment.clip.trimStart : 0
-  return { key, video: videos.value[key], time: located.local + offset }
+  return { key, video: videos.value[key], time: located.local + fileOffset(segment), index: segment.index }
 }
 
-/** Mantém o vídeo do segmento ativo tocando no tempo certo; o relógio do preview é o mestre. */
+/** Deixa o vídeo do próximo trecho já posicionado no início, para a troca não esperar um seek. */
+function prepareNext(afterIndex: number) {
+  const next = timeline.value.segments.slice(afterIndex + 1).find((s): s is VideoSegment => s.kind === 'slot' || s.kind === 'clip')
+  if (!next) return
+  const v = videos.value[videoKey(next)]
+  const target = fileOffset(next)
+  if (v && v.paused && !v.seeking && Math.abs(v.currentTime - target) > 0.05) v.currentTime = target
+}
+
+/**
+ * Mantém o vídeo do segmento ativo no tempo do relógio. Seek só na troca de trecho ou
+ * se a diferença ficar grande (com intervalo mínimo); diferenças pequenas são corrigidas
+ * ajustando a velocidade, o que não trava a imagem.
+ */
 function syncVideos(t: number, seek: boolean) {
   const active = activeVideo(locate(timeline.value, t))
   const key = active?.key ?? null
@@ -170,42 +238,47 @@ function syncVideos(t: number, seek: boolean) {
     if (activeKey) videos.value[activeKey]?.pause()
     activeKey = key
     seek = true
+    if (active) prepareNext(active.index)
   }
   const v = active?.video
   if (!active || !v) return
-  if (seek || Math.abs(v.currentTime - active.time) > 0.25) v.currentTime = active.time
+  const drift = v.currentTime - active.time
+  const nowMs = performance.now()
+  if (seek) {
+    if (Math.abs(drift) > 0.05) v.currentTime = active.time
+    lastSeekAt = nowMs
+    v.playbackRate = 1
+  } else if (playing.value && !v.seeking) {
+    if (Math.abs(drift) > 0.6 && nowMs - lastSeekAt > 1500) {
+      v.currentTime = active.time + 0.15 // um pouco à frente: o seek leva tempo
+      lastSeekAt = nowMs
+    } else {
+      v.playbackRate = Math.min(1.15, Math.max(0.85, 1 - drift))
+    }
+  }
   if (playing.value && v.paused) void v.play().catch(() => {})
   if (!playing.value && !v.paused) v.pause()
 }
 
-async function startMusic(t: number) {
-  const music = template.value.music
-  if (!music) return
-  audioCtx ??= new AudioContext()
-  await audioCtx.resume()
-  if (!musicBuffer) {
-    const data = await (await fetch(props.entry.assets[music.asset]!)).arrayBuffer()
-    musicBuffer = await audioCtx.decodeAudioData(data)
-  }
-  stopMusic()
+function startAudio(t: number) {
+  stopAudio()
+  if (!mix || !audioCtx) return
   const src = audioCtx.createBufferSource()
-  src.buffer = musicBuffer
-  src.loop = music.loop
-  const gain = audioCtx.createGain()
-  const base = audioCtx.currentTime
-  gain.gain.setValueAtTime(gainAt(musicCurve.value, t), base)
-  for (const k of musicCurve.value) if (k.time > t) gain.gain.linearRampToValueAtTime(k.gain, base + k.time - t)
-  src.connect(gain).connect(audioCtx.destination)
-  src.start(base, music.loop ? t % musicBuffer.duration : t)
-  musicNodes = { src, gain }
+  src.buffer = mix
+  src.connect(audioCtx.destination)
+  src.start(0, Math.min(t, mix.duration))
+  mixSource = src
 }
 
-function stopMusic() {
-  if (!musicNodes) return
-  musicNodes.src.stop()
-  musicNodes.src.disconnect()
-  musicNodes.gain.disconnect()
-  musicNodes = null
+function stopAudio() {
+  if (!mixSource) return
+  try {
+    mixSource.stop()
+  } catch {
+    // já parado
+  }
+  mixSource.disconnect()
+  mixSource = null
 }
 
 function tick() {
@@ -225,18 +298,22 @@ function tick() {
 async function play() {
   if (loading.value || playing.value) return
   if (time.value >= timeline.value.duration - 0.05) time.value = 0
+  // AudioContext criado e retomado dentro do toque (exigência do iOS).
+  audioCtx ??= new AudioContext()
+  void audioCtx.resume()
   playing.value = true
+  startAudio(time.value)
   clockOffset = time.value
-  clockStart = performance.now()
+  clockStart = reference()
   syncVideos(time.value, true)
-  void startMusic(time.value)
   raf = requestAnimationFrame(tick)
 }
 
 function pause() {
+  if (playing.value) time.value = now()
   playing.value = false
   cancelAnimationFrame(raf)
-  stopMusic()
+  stopAudio()
   for (const v of Object.values(videos.value)) v.pause()
 }
 
@@ -262,10 +339,12 @@ function cleanup() {
     v.pause()
     v.removeAttribute('src')
     v.load()
+    v.remove()
   }
   videos.value = {}
   objectUrls.splice(0).forEach((u) => URL.revokeObjectURL(u))
   activeKey = null
+  mix = null
 }
 
 onMounted(load)
@@ -282,7 +361,8 @@ defineExpose({ pause })
   <div class="preview">
     <div class="stage" :style="{ aspectRatio: `${size.width} / ${size.height}`, width: `min(100%, calc(65vh * ${size.width / size.height}))` }">
       <canvas ref="canvas" :width="size.width" :height="size.height" @click="playing ? pause() : play()" />
-      <div v-if="loading" class="overlay">Carregando vídeos…</div>
+      <div ref="sources" class="sources" aria-hidden="true" />
+      <div v-if="loading" class="overlay">{{ loadingLabel }}</div>
       <button v-else-if="!playing" class="overlay play" aria-label="Reproduzir" @click="play">▶</button>
     </div>
     <div class="controls">
@@ -312,6 +392,18 @@ defineExpose({ pause })
   background: #000;
   border-radius: 14px;
   overflow: hidden;
+}
+.sources {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.sources :deep(video) {
+  width: 1px;
+  height: 1px;
 }
 canvas {
   display: block;
