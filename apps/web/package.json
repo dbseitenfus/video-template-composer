@@ -5,13 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:api": "vite build && wrangler d1 migrations apply takeslot --local && wrangler pages dev dist --port 8788",
+    "dev:api": "vite build && wrangler d1 migrations apply gravai --local && wrangler pages dev dist --port 8788",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit && tsc -p functions/tsconfig.json",
     "test:e2e": "playwright test",
     "test:e2e:admin": "playwright test -c playwright.admin.config.ts",
-    "deploy": "vite build && wrangler pages deploy dist"
+    "deploy": "vite build && wrangler d1 migrations apply gravai --remote && wrangler pages deploy dist --branch main"
   },
   "dependencies": {
     "@takeslot/engine": "0.1.0",

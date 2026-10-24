@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: 'Takeslot',
-        short_name: 'Takeslot',
+        name: 'Gravaí',
+        short_name: 'Gravaí',
         description: 'Grave takes guiados por roteiro e monte o vídeo no próprio aparelho.',
         lang: 'pt-BR',
         theme_color: '#15152b',

@@ -18,7 +18,7 @@ const current = computed(() => steps.findIndex((s) => s.name === route.name))
 
 <template>
   <header v-if="!fullscreen" class="topbar">
-    <RouterLink to="/" class="brand">takeslot</RouterLink>
+    <RouterLink to="/" class="brand">gravaí</RouterLink>
     <ol v-if="project.template && !admin" class="steps" aria-label="Etapas">
       <li v-for="(step, i) in steps" :key="step.name" :class="{ done: i < current, current: i === current }">{{ step.label }}</li>
     </ol>

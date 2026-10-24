@@ -214,7 +214,7 @@ PW_CHANNEL=chrome npm run test:e2e
 
 Sem `PW_CHANNEL`, o Playwright usa o próprio Chromium (`npx playwright install chromium`), e o áudio sai em Opus.
 
-A câmera e o OPFS exigem contexto seguro: no celular, abra o app por HTTPS (ou pelo deploy de preview do Cloudflare Pages). O deploy é feito com `npm run deploy -w @takeslot/web` (veja "Admin de templates"); `_headers` está em `apps/web/public`, e o Pages já serve a SPA sem regra de redirecionamento.
+A câmera e o OPFS exigem contexto seguro: no celular, abra o app por HTTPS (ou pelo deploy de preview do Cloudflare Pages). O deploy é feito com `npm run deploy -w @takeslot/web` (o nome público do app é Gravaí) (veja "Admin de templates"); `_headers` está em `apps/web/public`, e o Pages já serve a SPA sem regra de redirecionamento.
 
 **Onde está cada parte do pipeline**
 
@@ -280,16 +280,19 @@ npm run dev          # opcional: Vite com hot reload em :5173, repassando /api p
 
 Em `/admin`, entre com o token e use **Importar exemplos** para copiar os templates embutidos para o backend.
 
-**Produção (Cloudflare Pages)**, uma vez:
+**Produção (Cloudflare Pages)** — o app se chama **Gravaí** e o projeto no Pages é `gravai`. Uma vez só, dentro de `apps/web`:
 
 ```bash
-cd apps/web
-npx wrangler d1 create takeslot                      # copie o database_id para o wrangler.toml
-npx wrangler r2 bucket create takeslot-assets
-npx wrangler d1 migrations apply takeslot --remote
-npx wrangler pages secret put ADMIN_TOKEN
-npm run deploy
+npx wrangler login
+npx wrangler d1 create gravai                        # copie o database_id para o wrangler.toml
+npx wrangler r2 bucket create gravai-assets          # o R2 precisa estar ativado no painel
+npx wrangler pages project create gravai --production-branch main
+openssl rand -base64 32                              # gere o token do admin
+npx wrangler pages secret put ADMIN_TOKEN --project-name gravai
+npm run deploy                                       # build + migrações remotas + publicação
 ```
+
+O app fica em `https://gravai.pages.dev` e o admin em `/admin`. Para atualizar depois, basta `npm run deploy`.
 
 **Custos:** D1 e R2 cabem no plano gratuito no começo (5 GB e 10 GB). O R2 não cobra pela transferência de saída, e isso pesa aqui, porque cada usuário baixa os vídeos pré-gravados.
 

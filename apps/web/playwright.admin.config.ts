@@ -15,7 +15,7 @@ export default defineConfig({
     command: [
       `rm -rf ${state}`,
       'npx vite build',
-      `npx wrangler d1 migrations apply takeslot --local --persist-to ${state}`,
+      `npx wrangler d1 migrations apply gravai --local --persist-to ${state}`,
       `npx wrangler pages dev dist --port 8789 --persist-to ${state} --binding ADMIN_TOKEN=${ADMIN_TOKEN}`,
     ].join(' && '),
     port: 8789,
