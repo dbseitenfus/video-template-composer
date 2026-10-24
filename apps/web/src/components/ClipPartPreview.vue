@@ -2,10 +2,15 @@
 import { onBeforeUnmount, ref } from 'vue'
 
 /**
- * Mostra um trecho do vídeo pronto (de `start` a `start + duration`) antes de a pessoa
- * gravar o comentário que vem depois dele: durante a gravação ela não vê o vídeo.
+ * Mostra um trecho de vídeo pronto do modelo (de `start` a `start + duration`).
+ * Durante a gravação a pessoa não vê esses vídeos, então eles aparecem:
+ * - `before`: antes de gravar um trecho que vem logo depois do vídeo (ex.: um comentário);
+ * - `after`: antes de gravar um trecho que apresenta o vídeo que vem em seguida;
+ * - `view`: na lista de trechos, só para assistir.
  */
-const props = defineProps<{ src: string; start: number; duration: number; title: string }>()
+const props = withDefaults(defineProps<{ src: string; start: number; duration: number; title: string; mode?: 'before' | 'after' | 'view' }>(), {
+  mode: 'before',
+})
 const emit = defineEmits<{ close: [] }>()
 
 const video = ref<HTMLVideoElement | null>(null)
@@ -38,9 +43,21 @@ onBeforeUnmount(() => video.value?.pause())
 <template>
   <div class="backdrop" role="dialog" aria-modal="true" aria-label="Trecho do vídeo antes do seu comentário">
     <div class="sheet">
-      <p class="eyebrow">Antes de gravar</p>
-      <h2>Veja o trecho do vídeo que vem antes do seu comentário</h2>
-      <p class="muted">No vídeo final, seu comentário entra logo depois desta parte de “{{ title }}”.</p>
+      <template v-if="mode === 'before'">
+        <p class="eyebrow">Antes de gravar</p>
+        <h2>Veja o trecho do vídeo que vem antes do seu comentário</h2>
+        <p class="muted">No vídeo final, seu trecho entra logo depois desta parte de “{{ title }}”.</p>
+      </template>
+      <template v-else-if="mode === 'after'">
+        <p class="eyebrow">Antes de gravar</p>
+        <h2>Veja o vídeo que vem depois do seu trecho</h2>
+        <p class="muted">No vídeo final, “{{ title }}” entra logo depois do que você gravar.</p>
+      </template>
+      <template v-else>
+        <p class="eyebrow">Vídeo do modelo</p>
+        <h2>{{ title }}</h2>
+        <p class="muted">Este vídeo já faz parte do modelo: você não precisa gravá-lo.</p>
+      </template>
       <video
         ref="video"
         :src="src"
@@ -53,7 +70,9 @@ onBeforeUnmount(() => video.value?.pause())
       />
       <div class="row actions">
         <button v-if="ended" class="ghost" @click="replay">Ver de novo</button>
-        <button data-testid="clip-part-done" @click="emit('close')">{{ ended ? 'Gravar meu comentário' : 'Pular e gravar' }}</button>
+        <button data-testid="clip-part-done" @click="emit('close')">
+          {{ mode === 'view' ? 'Fechar' : ended ? 'Gravar meu trecho' : 'Pular e gravar' }}
+        </button>
       </div>
     </div>
   </div>

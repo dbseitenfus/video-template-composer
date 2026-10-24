@@ -3,6 +3,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import SlotList from '../components/SlotList.vue'
 import TakeReview from '../components/TakeReview.vue'
+import ClipPartPreview from '../components/ClipPartPreview.vue'
+import { templateSequence } from '@takeslot/schema'
 import { useProjectStore } from '../stores/project'
 import { formatBytes } from '../lib/format'
 import { storageEstimate } from '../lib/opfs'
@@ -13,6 +15,13 @@ const watching = ref<string | null>(null)
 const storage = ref<{ usage: number; quota: number } | null>(null)
 
 const template = computed(() => project.template!)
+const items = computed(() => templateSequence(template.value))
+const watchingClipId = ref<string | null>(null)
+const watchingClip = computed(() => {
+  const clip = template.value.clips.find((c) => c.id === watchingClipId.value)
+  const src = clip ? project.entry?.assets[clip.asset] : undefined
+  return clip && src ? { src, start: clip.trimStart, duration: clip.duration, title: clip.label } : null
+})
 const watchingSlot = computed(() => template.value.slots.find((s) => s.id === watching.value) ?? null)
 const tooShort = computed(() => template.value.slots.filter((s) => project.slotStatus(s.id) === 'too-short'))
 
@@ -31,10 +40,20 @@ function record(slotId: string) {
   <main class="page">
     <section>
       <h1>{{ template.name }}</h1>
-      <p class="muted">Grave os trechos na ordem que preferir. Qualquer take pode ser regravado antes de montar.</p>
+      <p class="muted">
+        Grave os trechos na ordem que preferir. Qualquer take pode ser regravado antes de montar.
+        <template v-if="template.clips.length"> Os vídeos prontos aparecem na lista na posição em que entram no vídeo final.</template>
+      </p>
     </section>
 
-    <SlotList :slots="template.slots" :takes="project.takes" :status="project.slotStatus" @record="record" @watch="watching = $event" />
+    <SlotList
+      :items="items"
+      :takes="project.takes"
+      :status="project.slotStatus"
+      @record="record"
+      @watch="watching = $event"
+      @watch-clip="watchingClipId = $event"
+    />
 
     <p v-if="tooShort.length" class="warn">
       {{ tooShort.map((s) => s.label).join(', ') }}: take mais curto que o mínimo sugerido. Dá para montar assim mesmo, mas vale regravar.
@@ -48,6 +67,16 @@ function record(slotId: string) {
     </div>
 
     <p v-if="storage" class="muted small">Espaço usado no aparelho: {{ formatBytes(storage.usage) }} de {{ formatBytes(storage.quota) }}</p>
+
+    <ClipPartPreview
+      v-if="watchingClip"
+      :src="watchingClip.src"
+      :start="watchingClip.start"
+      :duration="watchingClip.duration"
+      :title="watchingClip.title"
+      mode="view"
+      @close="watchingClipId = null"
+    />
 
     <TakeReview
       v-if="watchingSlot && project.takes[watchingSlot.id]"

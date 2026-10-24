@@ -31,17 +31,25 @@ const slot = computed(() => template.value.slots.find((s) => s.id === route.para
 const slotIndex = computed(() => template.value.slots.indexOf(slot.value))
 const aspect = computed(() => template.value.canvas.width / template.value.canvas.height)
 const remaining = computed(() => Math.max(0, slot.value.maxDuration - recorder.elapsed.value))
-/** Parte do vídeo pronto que toca logo antes deste trecho, se houver (a pessoa precisa vê-la antes de comentar). */
-const previousClip = computed(() => {
+/**
+ * Vídeo pronto vizinho deste trecho: o que toca logo antes (a pessoa precisa vê-lo para
+ * comentar) ou, se não houver, o que toca logo depois (o que o trecho apresenta).
+ * Durante a gravação a pessoa não vê esses vídeos.
+ */
+const neighborClip = computed(() => {
   const seq = templateSequence(template.value)
   const i = seq.findIndex((item) => item.kind === 'slot' && item.slot.id === slot.value.id)
-  const prev = i > 0 ? seq[i - 1] : undefined
-  if (prev?.kind !== 'clip') return null
-  const src = project.entry?.assets[prev.clip.asset]
-  return src ? { src, start: prev.clip.trimStart, duration: prev.clip.duration, title: prev.clip.label } : null
+  const prev = seq[i - 1]
+  const next = seq[i + 1]
+  const pick = prev?.kind === 'clip' ? { item: prev, mode: 'before' as const } : next?.kind === 'clip' ? { item: next, mode: 'after' as const } : null
+  if (!pick || pick.item.kind !== 'clip') return null
+  const { clip } = pick.item
+  const src = project.entry?.assets[clip.asset]
+  return src ? { src, start: clip.trimStart, duration: clip.duration, title: clip.label, mode: pick.mode } : null
 })
 const showClip = ref(false)
-watch(previousClip, (clip) => (showClip.value = !!clip), { immediate: true })
+// Abre sozinho só na primeira gravação do trecho; ao regravar, fica no botão "Ver o vídeo".
+watch(neighborClip, (clip) => (showClip.value = !!clip && !project.takes[slot.value.id]), { immediate: true })
 
 const tooShort = computed(() => recorder.recording.value && recorder.elapsed.value < slot.value.minDuration)
 
@@ -115,13 +123,13 @@ async function back() {
           <span class="slot-name">{{ slotIndex + 1 }}/{{ template.slots.length }} · {{ slot.label }}</span>
           <div class="row tools">
             <button
-              v-if="previousClip"
+              v-if="neighborClip"
               class="ghost small on-video"
               :disabled="recorder.recording.value || countdown > 0"
               data-testid="show-clip-part"
               @click="showClip = true"
             >
-              Ver o trecho
+              Ver o vídeo
             </button>
             <button class="ghost small on-video" :disabled="recorder.recording.value || countdown > 0" @click="camera.switchCamera()">Virar</button>
           </div>
@@ -153,11 +161,12 @@ async function back() {
       </div>
     </CameraView>
     <ClipPartPreview
-      v-if="showClip && previousClip"
-      :src="previousClip.src"
-      :start="previousClip.start"
-      :duration="previousClip.duration"
-      :title="previousClip.title"
+      v-if="showClip && neighborClip"
+      :src="neighborClip.src"
+      :start="neighborClip.start"
+      :duration="neighborClip.duration"
+      :title="neighborClip.title"
+      :mode="neighborClip.mode"
       @close="showClip = false"
     />
   </main>

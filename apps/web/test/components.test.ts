@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { parseTemplate } from '@takeslot/schema'
+import { parseTemplate, templateSequence } from '@takeslot/schema'
 import SlotList from '../src/components/SlotList.vue'
 import Teleprompter from '../src/components/Teleprompter.vue'
 import UnsupportedNotice from '../src/components/UnsupportedNotice.vue'
@@ -15,7 +15,9 @@ const template = parseTemplate({
     { id: 'a', label: 'Abertura', script: 'Oi', minDuration: 3, maxDuration: 10 },
     { id: 'b', label: 'Fechamento', script: 'Tchau', maxDuration: 10 },
   ],
+  clips: [{ id: 'v', label: 'Vídeo da campanha', asset: 'v.mp4', after: 'a', duration: 30 }],
 })
+const items = templateSequence(template)
 
 const take = (slotId: string, duration: number): TakeMeta => ({
   id: slotId,
@@ -32,23 +34,28 @@ describe('SlotList', () => {
   it('mostra status e emite ações', async () => {
     const takes = { a: take('a', 2) }
     const wrapper = mount(SlotList, {
-      props: { slots: template.slots, takes, status: (id: string) => (id === 'a' ? 'too-short' : 'empty') },
+      props: { items, takes, status: (id: string) => (id === 'a' ? 'too-short' : 'empty') },
     })
-    const items = wrapper.findAll('li')
-    expect(items).toHaveLength(2)
-    expect(items[0]!.classes()).toContain('too-short')
-    expect(items[0]!.text()).toContain('curto demais')
-    expect(items[1]!.text()).toContain('ainda não gravado')
+    const rows = wrapper.findAll('li')
+    expect(rows).toHaveLength(3)
+    expect(rows[0]!.classes()).toContain('too-short')
+    expect(rows[0]!.text()).toContain('curto demais')
+    // o vídeo pronto aparece entre os trechos, na posição em que entra
+    expect(rows[1]!.classes()).toContain('clip')
+    expect(rows[1]!.text()).toContain('Vídeo da campanha')
+    expect(rows[2]!.text()).toContain('ainda não gravado')
 
-    await items[0]!.find('button').trigger('click')
+    await rows[0]!.find('button').trigger('click')
     expect(wrapper.emitted('watch')?.[0]).toEqual(['a'])
-    await items[1]!.find('button').trigger('click')
+    await rows[1]!.find('button').trigger('click')
+    expect(wrapper.emitted('watchClip')?.[0]).toEqual(['v'])
+    await rows[2]!.find('button').trigger('click')
     expect(wrapper.emitted('record')?.[0]).toEqual(['b'])
   })
 
   it('avisa quando o take vai ser cortado', () => {
     const wrapper = mount(SlotList, {
-      props: { slots: template.slots, takes: { b: take('b', 14) }, status: () => 'recorded' },
+      props: { items, takes: { b: take('b', 14) }, status: () => 'recorded' },
     })
     expect(wrapper.text()).toContain('será cortado em 0:10')
   })
