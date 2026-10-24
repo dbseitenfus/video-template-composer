@@ -319,20 +319,9 @@ h2 {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--br-green);
+  background: var(--br-blue);
   color: #fff;
   font-weight: 800;
-}
-/* Cada passo com uma cor da bandeira, e o último com o vermelho. */
-.steps li:nth-child(2) .num {
-  background: var(--br-yellow);
-  color: var(--br-blue);
-}
-.steps li:nth-child(3) .num {
-  background: #1f5bd8;
-}
-.steps li:nth-child(4) .num {
-  background: var(--red);
 }
 .steps p {
   margin: 0.2rem 0 0;
