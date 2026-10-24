@@ -2,6 +2,84 @@
 
 Oct 23, 2026 · @Daniel
 
+## Como executar o projeto
+
+O app se chama **Gravaí**. Tudo roda no navegador; o servidor só entrega o app, os templates e os arquivos.
+
+**Requisitos**
+
+- Node.js 20 ou mais novo (`node -v` para conferir)
+- Chrome, Edge, Safari 26+ ou Firefox atualizado
+- Para o teste ponta a ponta: Google Chrome instalado
+
+**1. Instalar as dependências** (na raiz do repositório):
+
+```bash
+npm install
+```
+
+**2. Rodar o app com o admin** (recomendado). Primeiro, crie o arquivo de segredos locais e defina um token de pelo menos 16 caracteres:
+
+```bash
+cp apps/web/.dev.vars.example apps/web/.dev.vars
+```
+
+Depois suba o servidor local da Cloudflare, que serve o app, a API e o admin com banco e arquivos simulados (sem conta na Cloudflare):
+
+```bash
+npm run dev:api
+```
+
+- App: http://localhost:8788
+- Admin: http://localhost:8788/admin (entre com o token do `.dev.vars` e clique em **Importar exemplos**)
+
+**3. Desenvolver com recarga automática** (opcional, em outro terminal, com o passo 2 rodando):
+
+```bash
+npm run dev
+```
+
+Abra http://localhost:5173. As chamadas `/api` vão para o servidor do passo 2. Sem ele, o app funciona com os templates embutidos, mas o admin não.
+
+**4. Testes**
+
+```bash
+npm test             # testes unitários
+npm run typecheck    # checagem de tipos de todos os pacotes
+npm run build        # build de produção em apps/web/dist
+```
+
+Testes ponta a ponta, com câmera falsa no Chrome instalado (gravam, exportam e testam a retomada; o do admin sobe o próprio servidor local):
+
+```bash
+PW_CHANNEL=chrome npm run test:e2e
+```
+
+```bash
+PW_CHANNEL=chrome npm run test:e2e:admin
+```
+
+**5. Ferramentas**
+
+```bash
+npm run bench        # benchmark de exportação e galeria de templates (/gallery.html)
+```
+
+O benchmark fica exposto na rede local, mas câmera e armazenamento local só funcionam em HTTPS ou em `localhost`. Para testar no celular, use o deploy de produção ou de preview.
+
+**6. Deploy:** veja "Produção (Cloudflare Pages)" na seção "Admin de templates". Depois de configurado uma vez, cada atualização é:
+
+```bash
+npm run deploy -w @takeslot/web
+```
+
+**Problemas comuns**
+
+- *"A API do admin não respondeu"*: o servidor do passo 2 não está rodando.
+- *"ADMIN_TOKEN não configurado"*: falta o `apps/web/.dev.vars`, ou o token tem menos de 16 caracteres.
+- *Câmera não abre*: libere a permissão no navegador e use `localhost` ou HTTPS.
+- *O app mostra só um template estranho*: há um template publicado no banco local; arquive-o no admin ou apague a pasta `apps/web/.wrangler` para zerar os dados locais.
+
 ## Objetivo e escopo
 
 Entregar em 11 a 14 semanas, com um desenvolvedor, um app web que grava takes guiados por roteiro, encaixa esses takes num template e exporta um MP4 inteiramente no navegador, sem render no servidor.
@@ -193,28 +271,7 @@ Os valores são aproximados e devem ser conferidos nas páginas de preço antes 
 - [ ] Definir o primeiro template real (slots, textos e trilha)
 - [ ] Rodar o benchmark e decidir, no gate da fase 0, se o plano segue no cliente
 
-## Como rodar
-
-Requer Node 20+. O monorepo usa npm workspaces (`apps/web`, `packages/*`, `tools/bench`).
-
-```bash
-npm install
-npm run dev          # app em http://localhost:5173
-npm run bench        # página de benchmark (fase 0), exposta na rede local para testar no celular
-npm test             # testes unitários (Vitest + Vue Test Utils)
-npm run typecheck    # tsc / vue-tsc em todos os pacotes
-npm run build        # build de produção do app (PWA) em apps/web/dist
-```
-
-Para o teste ponta a ponta (grava com câmera falsa, exporta e testa a retomada), use o Chrome instalado, que tem AAC:
-
-```bash
-PW_CHANNEL=chrome npm run test:e2e
-```
-
-Sem `PW_CHANNEL`, o Playwright usa o próprio Chromium (`npx playwright install chromium`), e o áudio sai em Opus.
-
-A câmera e o OPFS exigem contexto seguro: no celular, abra o app por HTTPS (ou pelo deploy de preview do Cloudflare Pages). O deploy é feito com `npm run deploy -w @takeslot/web` (o nome público do app é Gravaí) (veja "Admin de templates"); `_headers` está em `apps/web/public`, e o Pages já serve a SPA sem regra de redirecionamento.
+## Referência técnica
 
 **Onde está cada parte do pipeline**
 
